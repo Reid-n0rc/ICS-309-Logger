@@ -315,7 +315,7 @@ Five workflows drive continuous integration and delivery. Desktop builds target
 | [`nightly.yml`](.github/workflows/nightly.yml) | Every push to `main` | Builds all platforms and publishes them to a single rolling **`nightly`** pre-release, recreated each run so it always tracks the latest commit. |
 | [`release.yml`](.github/workflows/release.yml) | Push of a `v*` tag (or manual dispatch) | Builds all platforms and creates a **stable, versioned** GitHub Release (as a draft to review before publishing). |
 | [`screenshots.yml`](.github/workflows/screenshots.yml) | Push to `main` touching GUI source | Regenerates the README screenshots from the built UI and commits any changes back (auto-commit carries `[skip ci]`, so it doesn't trigger rebuilds). |
-| [`android.yml`](.github/workflows/android.yml) | Manual dispatch or `v*` tag | Sets up the Android SDK/NDK and builds a debug APK, uploaded as an artifact. |
+| [`android.yml`](.github/workflows/android.yml) | Every push & PR, plus manual dispatch / `v*` tag | Sets up the Android SDK/NDK, builds a debug APK, verifies it's a valid APK (manifest + dex), and uploads it as an artifact. |
 
 **Cross-OS verification.** Every feature (event lifecycle, log entries, per-call-sign
 auto message numbering, FLdigi export) is covered by Rust integration tests that run on
