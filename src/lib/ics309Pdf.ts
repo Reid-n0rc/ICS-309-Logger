@@ -256,5 +256,15 @@ export function buildIcs309Doc(event: Event, entries: LogEntry[]): Ics309Build {
     }
   }
 
+  // Stamp "PAGE X OF Y" at the bottom of every page (page count is final now).
+  const totalPages = doc.getNumberOfPages();
+  for (let pageNo = 1; pageNo <= totalPages; pageNo++) {
+    doc.setPage(pageNo);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(0);
+    doc.text(`PAGE ${pageNo} OF ${totalPages}`, right, pageH - 3, { align: "right" });
+  }
+
   return { doc, fields };
 }
