@@ -8,6 +8,8 @@ The app is **portable** — it does not require installation and can be run from
 removable media such as a USB flash drive. Its database lives next to the
 executable, so the entire log travels with the drive.
 
+**🌐 Project site:** https://reid-n0rc.github.io/ICS-309-Logger/
+
 ---
 
 ## Getting Started

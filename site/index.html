@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICS-309 Communications Logger</title>
+    <meta
+      name="description"
+      content="A free, portable, cross-platform desktop app for capturing radio communications and producing FEMA ICS-309 Communications Logs. Runs from a USB drive — no installation required."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231e64c8'/%3E%3Ctext x='50' y='68' font-size='42' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3E309%3C/text%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --blue: #2563eb;
+        --blue-dark: #1e4fc0;
+        --ink: #111827;
+        --muted: #6b7280;
+        --bg: #f3f4f6;
+        --card: #ffffff;
+        --line: #e5e7eb;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.6;
+      }
+      a { color: var(--blue); }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+      /* Hero */
+      header.hero {
+        background: linear-gradient(160deg, #1f2937 0%, #111827 100%);
+        color: #fff;
+        padding: 84px 0 72px;
+        text-align: center;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #93c5fd;
+        border: 1px solid #334155;
+        border-radius: 999px;
+        padding: 4px 14px;
+        margin-bottom: 22px;
+      }
+      header.hero h1 { font-size: 44px; line-height: 1.1; margin: 0 0 14px; font-weight: 800; }
+      header.hero p.tagline { font-size: 20px; color: #cbd5e1; max-width: 720px; margin: 0 auto 32px; }
+      .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+      .btn {
+        display: inline-block;
+        padding: 13px 26px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 16px;
+        transition: transform 0.08s ease, background 0.15s ease;
+      }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-primary { background: var(--blue); color: #fff; }
+      .btn-primary:hover { background: var(--blue-dark); }
+      .btn-ghost { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid #334155; }
+      .btn-ghost:hover { background: rgba(255, 255, 255, 0.15); }
+
+      /* Sections */
+      section { padding: 64px 0; }
+      section h2 { font-size: 30px; text-align: center; margin: 0 0 8px; }
+      section p.sub { text-align: center; color: var(--muted); max-width: 680px; margin: 0 auto 40px; }
+
+      /* Feature grid */
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .feature {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .feature .icon { font-size: 26px; margin-bottom: 10px; }
+      .feature h3 { margin: 0 0 6px; font-size: 18px; }
+      .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+      /* Screenshots */
+      .shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+      figure { margin: 0; }
+      figure img {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        box-shadow: 0 6px 24px rgba(17, 24, 39, 0.08);
+        display: block;
+      }
+      figure figcaption { text-align: center; color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+      /* Download */
+      .downloads { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 8px; }
+      .dl-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+      }
+      .dl-card h3 { margin: 0 0 6px; font-size: 19px; }
+      .dl-card .file { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; color: var(--muted); }
+      .note { text-align: center; color: var(--muted); font-size: 14px; margin-top: 28px; }
+
+      /* Footer */
+      footer { padding: 40px 0; text-align: center; color: var(--muted); font-size: 14px; }
+      footer a { color: var(--muted); }
+
+      @media (max-width: 860px) {
+        .grid, .shots, .dl-grid { grid-template-columns: 1fr; }
+        header.hero h1 { font-size: 34px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <span class="badge">Free &amp; open source · ICS 309</span>
+        <h1>ICS-309 Communications Logger</h1>
+        <p class="tagline">
+          A fast, portable desktop app for capturing radio communications and producing
+          FEMA <strong>ICS-309 Communications Logs</strong>. Runs on macOS, Linux, and
+          Windows — straight from a USB drive, no installation required.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/Reid-n0rc/ICS-309-Logger/releases/latest">Download</a>
+          <a class="btn btn-ghost" href="https://github.com/Reid-n0rc/ICS-309-Logger">View on GitHub</a>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <div class="wrap">
+        <h2>Built for the radio operator</h2>
+        <p class="sub">
+          Keyboard-driven logging that matches the cadence of a real radio exchange, with
+          the official ICS-309 layout baked in.
+        </p>
+        <div class="grid">
+          <div class="feature">
+            <div class="icon">⌨️</div>
+            <h3>Keyboard-first logging</h3>
+            <p>Enter moves through the fields in the natural order of a transmission; the time stamps itself on submit.</p>
+          </div>
+          <div class="feature">
+            <div class="icon">🔢</div>
+            <h3>Auto message numbers</h3>
+            <p>Message numbers increment automatically per call sign, separately for FROM and TO. Manual entries are never overwritten.</p>
+          </div>
+          <div class="feature">
+            <div class="icon">✅</div>
+            <h3>Live spell check</h3>
+            <p>Misspelled words are underlined in the message field, with right-click suggestions — just like a word processor.</p>
+          </div>
+          <div class="feature">
+            <div class="icon">📄</div>
+            <h3>Export &amp; print</h3>
+            <p>One-click export to a form-accurate PDF, an Excel workbook, or an FLdigi file — plus direct printing.</p>
+          </div>
+          <div class="feature">
+            <div class="icon">💾</div>
+            <h3>Truly portable</h3>
+            <p>Stores everything in a single SQLite file next to the app. Copy it to a flash drive and the whole log travels with you.</p>
+          </div>
+          <div class="feature">
+            <div class="icon">🖥️</div>
+            <h3>Cross-platform</h3>
+            <p>One codebase, native builds for macOS (Apple Silicon &amp; Intel), Linux, and Windows.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:#fff;border-top:1px solid var(--line);">
+      <div class="wrap">
+        <h2>See it in action</h2>
+        <p class="sub">From creating an incident to a running communications log.</p>
+        <div class="shots">
+          <figure>
+            <img src="screenshots/01-startup.png" alt="Startup screen — create or open an event" />
+            <figcaption>Create a new event or reopen an existing one</figcaption>
+          </figure>
+          <figure>
+            <img src="screenshots/02-new-event.png" alt="New event form" />
+            <figcaption>Three quick fields, all keyboard-navigable</figcaption>
+          </figure>
+          <figure>
+            <img src="screenshots/03-log-view.png" alt="Communications log" />
+            <figcaption>The communications log, matching the ICS-309 form</figcaption>
+          </figure>
+          <figure>
+            <img src="screenshots/04-edit-entry.png" alt="Edit a log entry" />
+            <figcaption>Double-click any row to edit or delete it</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="downloads" id="download">
+      <div class="wrap">
+        <h2>Download</h2>
+        <p class="sub">No installation required — grab the portable build for your platform.</p>
+        <div class="dl-grid">
+          <div class="dl-card">
+            <h3>Windows</h3>
+            <p class="file">..._portable_windows_x64.zip</p>
+            <p>Unzip and double-click the app.</p>
+          </div>
+          <div class="dl-card">
+            <h3>macOS</h3>
+            <p class="file">..._aarch64.dmg / ..._x64.dmg</p>
+            <p>Open and drag the app anywhere.</p>
+          </div>
+          <div class="dl-card">
+            <h3>Linux</h3>
+            <p class="file">..._amd64.AppImage</p>
+            <p><code>chmod +x</code> and run.</p>
+          </div>
+        </div>
+        <p class="note">
+          <a class="btn btn-primary" href="https://github.com/Reid-n0rc/ICS-309-Logger/releases/latest" style="margin-top:8px;">Go to the latest release →</a>
+        </p>
+        <p class="note">
+          Builds are unsigned, so macOS (Gatekeeper) and Windows (SmartScreen) may warn on
+          first launch — see the
+          <a href="https://github.com/Reid-n0rc/ICS-309-Logger#run-the-app-no-installation">README</a>
+          for the one-time steps.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <p>
+          ICS-309 Communications Logger — released under the
+          <a href="https://github.com/Reid-n0rc/ICS-309-Logger/blob/main/LICENSE">MIT License</a>.
+          © 2026 Reid Crowe.
+        </p>
+        <p>
+          <a href="https://github.com/Reid-n0rc/ICS-309-Logger">Source</a> ·
+          <a href="https://github.com/Reid-n0rc/ICS-309-Logger/releases">Releases</a> ·
+          <a href="https://github.com/Reid-n0rc/ICS-309-Logger/issues">Issues</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
