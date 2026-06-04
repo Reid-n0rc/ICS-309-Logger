@@ -16,7 +16,8 @@ interface Props {
 }
 
 function nowDate() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 function nowTime() {
   const now = new Date();
@@ -69,18 +70,44 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
     }
   };
 
+  // On any export, if the ending operational period isn't set yet, stamp it to the
+  // current date/time (persisted) so the output always has an end time. Returns the
+  // event to use for the export.
+  const ensureEndPeriod = async (): Promise<Event> => {
+    if (event.to_date && event.to_time) return event;
+    try {
+      const input: UpdateEventInput = {
+        incident_name: event.incident_name,
+        radio_network_name: event.radio_network_name,
+        radio_operator: event.radio_operator,
+        from_date: event.from_date,
+        from_time: event.from_time,
+        to_date: event.to_date || nowDate(),
+        to_time: event.to_time || nowTime(),
+      };
+      const updated = await invoke<Event>("update_event", { id: event.id, input });
+      onEventUpdate(updated);
+      return updated;
+    } catch (err) {
+      console.error("Failed to set operational period end:", err);
+      return event;
+    }
+  };
+
   const handleExportPdf = async () => {
     try {
-      await exportIcs309Pdf(event, entries);
+      const ev = await ensureEndPeriod();
+      await exportIcs309Pdf(ev, entries);
     } catch (err) {
       console.error("PDF export failed:", err);
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    const ev = await ensureEndPeriod();
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
-    const html = buildPrintHtml(event, entries);
+    const html = buildPrintHtml(ev, entries);
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.focus();
@@ -89,7 +116,8 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
 
   const handleExportExcel = async () => {
     try {
-      await exportIcs309Excel(event, entries);
+      const ev = await ensureEndPeriod();
+      await exportIcs309Excel(ev, entries);
     } catch (err) {
       console.error("Excel export failed:", err);
     }
@@ -97,13 +125,19 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
 
   const handleExportFldigi = async () => {
     try {
-      const content = await invoke<string>("generate_fldigi_export", { eventId: event.id });
-      const filename = `ICS309-${event.incident_name.replace(/\s+/g, "_")}.flmsg`;
+      const ev = await ensureEndPeriod();
+      const content = await invoke<string>("generate_fldigi_export", { eventId: ev.id });
+      const filename = `ICS309-${ev.incident_name.replace(/\s+/g, "_")}.flmsg`;
       const bytes = new TextEncoder().encode(content);
       await saveBytesWithDialog(filename, [{ name: "FLdigi Message", extensions: ["flmsg"] }], bytes);
     } catch (err) {
       console.error("FLdigi export failed:", err);
     }
+  };
+
+  const handleOpenSignature = async () => {
+    await ensureEndPeriod();
+    setShowSignature(true);
   };
 
   return (
@@ -132,7 +166,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             Export PDF
           </button>
           <button
-            onClick={() => setShowSignature(true)}
+            onClick={handleOpenSignature}
             className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
           >
             Sign &amp; Export
