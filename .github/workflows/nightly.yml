@@ -20,7 +20,19 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create.outputs.result }}
+      nightly_version: ${{ steps.ver.outputs.version }}
     steps:
+      - name: Compute nightly version (latest release patch + 1)
+        id: ver
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=$(gh api "repos/${{ github.repository }}/releases/latest" --jq .tag_name 2>/dev/null || echo "")
+          ver=${tag#v}
+          if [ -z "$ver" ]; then ver="0.0.0"; fi
+          IFS=. read -r MA MI PA <<< "$ver"
+          echo "version=${MA:-0}.${MI:-0}.$(( ${PA:-0} + 1 ))" >> "$GITHUB_OUTPUT"
+
       - name: Recreate nightly release
         id: create
         uses: actions/github-script@v8
@@ -119,6 +131,9 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm install
+
+      - name: Set nightly version (latest release + 1 patch)
+        run: node scripts/set-version.mjs "${{ needs.create-release.outputs.nightly_version }}"
 
       - name: Build and upload
         id: tauri

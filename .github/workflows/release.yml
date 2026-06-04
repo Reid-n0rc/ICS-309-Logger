@@ -68,6 +68,10 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      - name: Set version from tag
+        if: github.ref_type == 'tag'
+        run: node scripts/set-version.mjs "${{ github.ref_name }}"
+
       - name: Build and publish release
         id: tauri
         uses: tauri-apps/tauri-action@v0
