@@ -25,6 +25,7 @@ pub fn run() {
             commands::get_next_msg_num,
             commands::generate_fldigi_export,
             commands::get_db_path_str,
+            commands::write_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,8 +1,9 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Event, LogEntry } from "../types";
+import { saveBytesWithDialog } from "./saveFile";
 
-export function exportIcs309Pdf(event: Event, entries: LogEntry[]) {
+export async function exportIcs309Pdf(event: Event, entries: LogEntry[]): Promise<string | null> {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 12;
@@ -129,5 +130,6 @@ export function exportIcs309Pdf(event: Event, entries: LogEntry[]) {
   doc.text(dtStr, margin + thirdW * 2 + 2, footerY + 10);
 
   const filename = `ICS309-${event.incident_name.replace(/\s+/g, "_")}.pdf`;
-  doc.save(filename);
+  const bytes = new Uint8Array(doc.output("arraybuffer"));
+  return saveBytesWithDialog(filename, [{ name: "PDF Document", extensions: ["pdf"] }], bytes);
 }
