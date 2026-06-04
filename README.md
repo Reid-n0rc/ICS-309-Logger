@@ -228,6 +228,28 @@ npm run tauri build
 The bundled application is written to `src-tauri/target/release/` (and platform
 bundles under `src-tauri/target/release/bundle/`).
 
+### Automated releases (GitHub Actions)
+
+The [`.github/workflows/release.yml`](.github/workflows/release.yml) workflow builds
+the app for **macOS (Apple Silicon + Intel), Linux, and Windows** using
+[`tauri-action`](https://github.com/tauri-apps/tauri-action) and attaches the bundles
+to a GitHub Release.
+
+To cut a release:
+
+1. Bump the version in `src-tauri/tauri.conf.json` (and `package.json`).
+2. Tag and push:
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+3. The workflow builds every platform and creates a **draft** GitHub Release with the
+   installers/bundles attached. Review the draft and click **Publish**.
+
+You can also trigger it manually from the **Actions** tab (**Run workflow**); it will
+use the version from `tauri.conf.json`. No signing certificates are configured, so the
+macOS/Windows bundles are unsigned — users may need to bypass Gatekeeper/SmartScreen.
+
 ### Type-check / compile checks
 
 ```bash
