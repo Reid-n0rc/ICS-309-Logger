@@ -83,9 +83,19 @@ function makeStub() {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Resolve a Chrome/Chromium binary:
+//   • PUPPETEER_EXECUTABLE_PATH wins if set (used in CI).
+//   • On macOS fall back to the system Google Chrome.
+//   • Otherwise let Puppeteer use its own bundled browser.
+const execPath =
+  process.env.PUPPETEER_EXECUTABLE_PATH ||
+  (process.platform === "darwin"
+    ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    : undefined);
+
 const browser = await puppeteer.launch({
-  executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  headless: "new",
+  ...(execPath ? { executablePath: execPath } : {}),
+  headless: true,
   args: ["--no-sandbox", "--force-device-scale-factor=2"],
 });
 

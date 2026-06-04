@@ -277,6 +277,7 @@ Three workflows drive continuous integration and delivery. All builds target
 | [`ci.yml`](.github/workflows/ci.yml) | Every push & PR (all branches) | Type-check, frontend build, and `cargo check` — fast feedback on every commit. |
 | [`nightly.yml`](.github/workflows/nightly.yml) | Every push to `main` | Builds all platforms and publishes them to a single rolling **`nightly`** pre-release, recreated each run so it always tracks the latest commit. |
 | [`release.yml`](.github/workflows/release.yml) | Push of a `v*` tag (or manual dispatch) | Builds all platforms and creates a **stable, versioned** GitHub Release (as a draft to review before publishing). |
+| [`screenshots.yml`](.github/workflows/screenshots.yml) | Push to `main` touching GUI source | Regenerates the README screenshots from the built UI and commits any changes back (auto-commit carries `[skip ci]`, so it doesn't trigger rebuilds). |
 
 **Continuous builds:** every commit to `main` produces downloadable installers on the
 [Releases page](https://github.com/Reid-n0rc/ICS-309-Logger/releases) under the
@@ -306,9 +307,12 @@ cd src-tauri && cargo check            # Rust
 ### Regenerating screenshots
 
 The screenshots in `docs/screenshots/` are produced by a headless harness that stubs
-the Tauri API with sample data:
+the Tauri API with sample data. They are **regenerated automatically by CI**
+([`screenshots.yml`](.github/workflows/screenshots.yml)) whenever GUI source changes
+on `main`, so they stay in sync with the interface. To regenerate them locally:
 
 ```bash
+npm install --no-save puppeteer   # one-time, if not already present
 npm run build
 npx vite preview --port 4173 &
 node scripts/screenshot.mjs

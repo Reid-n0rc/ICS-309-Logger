@@ -1,0 +1,80 @@
+name: Update Screenshots
+
+# When GUI source changes on main, regenerate the README screenshots from the
+# built frontend (via scripts/screenshot.mjs, which stubs the Tauri API with sample
+# data) and commit any changes back. The auto-commit touches only docs/screenshots/**
+# and carries [skip ci], so it never retriggers this or the build workflows.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "index.html"
+      - "tailwind.config.js"
+      - "postcss.config.js"
+      - "scripts/screenshot.mjs"
+      - ".github/workflows/screenshots.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: screenshots
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Install Puppeteer (with bundled Chromium)
+        run: npm install --no-save puppeteer@25
+
+      - name: Install Chromium runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+            libgbm1 libpango-1.0-0 libcairo2 libasound2
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 4173 &
+          for i in $(seq 1 40); do
+            curl -sf -o /dev/null http://localhost:4173 && break
+            sleep 0.5
+          done
+
+      - name: Capture screenshots
+        run: node scripts/screenshot.mjs
+
+      - name: Commit updated screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain docs/screenshots)" ]; then
+            git add docs/screenshots
+            git commit -m "docs: auto-update screenshots [skip ci]"
+            git pull --rebase origin main
+            git push
+            echo "Screenshots updated and pushed."
+          else
+            echo "No screenshot changes — GUI output is unchanged."
+          fi
