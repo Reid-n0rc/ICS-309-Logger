@@ -14,7 +14,7 @@ executable, so the entire log travels with the drive.
 
 ### Download a build
 
-Pre-built bundles are published on the
+Pre-built downloads are published on the
 **[Releases page](https://github.com/Reid-n0rc/ICS-309-Logger/releases)** for macOS,
 Linux, and Windows:
 
@@ -22,39 +22,46 @@ Linux, and Windows:
 - **Nightly** — the `nightly` pre-release is rebuilt from the latest commit on `main`
   every time it changes; use it to test the newest features.
 
-Grab the file that matches your platform:
+**Every platform has a no-install option** — grab the portable download for yours:
 
-| Platform | Download | Notes |
+| Platform | Portable download (no install) | What to do |
 |---|---|---|
-| **Windows** | `..._x64-setup.exe` or `..._x64_en-US.msi` | Either installer works. |
-| **macOS (Apple Silicon)** | `..._aarch64.dmg` | M1/M2/M3/M4 Macs. |
-| **macOS (Intel)** | `..._x64.dmg` | Older Intel Macs. |
-| **Linux (Debian/Ubuntu)** | `..._amd64.deb` | `sudo dpkg -i <file>.deb` |
-| **Linux (any distro)** | `..._amd64.AppImage` | `chmod +x` then run — no install needed. |
-| **Linux (Fedora/RHEL)** | `....x86_64.rpm` | `sudo rpm -i <file>.rpm` |
+| **Windows** | `ICS-309-Logger_portable_windows_x64.zip` | Unzip, double-click `ICS-309 Logger.exe`. |
+| **macOS (Apple Silicon)** | `..._aarch64.dmg` | M1/M2/M3/M4 — open it, drag the app out, run it. |
+| **macOS (Intel)** | `..._x64.dmg` | Older Intel Macs — same as above. |
+| **Linux (any distro)** | `..._amd64.AppImage` | `chmod +x` then run. |
 
-### Run the app
+Traditional installers are also provided if you prefer them: Windows
+`..._x64-setup.exe` / `..._x64_en-US.msi`, Linux `..._amd64.deb` /
+`....x86_64.rpm`.
 
-**Windows** — run the `.exe`/`.msi` installer, then launch *ICS-309 Logger* from the
-Start menu. On first launch, SmartScreen may warn (the build is unsigned): click
-**More info → Run anyway**.
+### Run the app (no installation)
 
-**macOS** — open the `.dmg` and drag *ICS-309 Logger* to Applications (or run it from
-the mounted volume). Because the build is unsigned, the first launch is blocked:
-**right-click the app → Open → Open**, or allow it under
-**System Settings → Privacy & Security**.
+**Windows** — unzip `ICS-309-Logger_portable_windows_x64.zip` and double-click
+**`ICS-309 Logger.exe`**. SmartScreen may warn on first launch (the build is unsigned):
+click **More info → Run anyway**. Needs the Microsoft
+[WebView2 runtime](https://developer.microsoft.com/microsoft-edge/webview2/),
+which is preinstalled on Windows 11 and most up-to-date Windows 10 systems.
 
-**Linux** — install the `.deb`/`.rpm`, or make the `.AppImage` executable and run it:
+**macOS** — open the `.dmg` and drag **ICS-309 Logger** to wherever you want to run it
+(a folder or your USB drive — Applications is optional). Because the build is unsigned,
+the first launch is blocked: **right-click the app → Open → Open**. If you run it from a
+USB drive and it won't start, clear the quarantine flag once:
+```bash
+xattr -dr com.apple.quarantine "/Volumes/<drive>/ICS-309 Logger.app"
+```
 
+**Linux** — make the AppImage executable and run it, from anywhere including a flash drive:
 ```bash
 chmod +x ICS-309*.AppImage
 ./ICS-309*.AppImage
 ```
 
-> **Portable use:** the app stores its data in a single SQLite file, `ics309_data.db`,
-> created next to the executable on first run. The AppImage (Linux) and the `.app`
-> (macOS) are self-contained — copy them to a USB drive and the whole log travels with
-> the drive, no installation required.
+> **Portable by design:** the app stores everything in a single SQLite file,
+> `ics309_data.db`, created **next to the app** on first run. Copy the portable build to
+> a USB flash drive and the whole communications log travels with it — no installation,
+> nothing left behind on the host machine. (If the app is ever launched from a read-only
+> location, it falls back to a per-user data folder so it still runs.)
 
 ### Run from source
 
@@ -228,9 +235,11 @@ ICS-309-Logger/
 ## Data storage
 
 All data is stored in a single SQLite file, **`ics309_data.db`**, written next to the
-application executable (on macOS, alongside the `.app` bundle). This keeps the app
-self-contained and portable — copy the executable and its database to a flash drive
-and the full log goes with it.
+app — alongside the `.exe` (Windows), beside the `.app` bundle (macOS), or next to the
+`.AppImage` (Linux, resolved via the `$APPIMAGE` path so it works despite the read-only
+runtime mount). This keeps the app self-contained and portable — copy the app and its
+database to a flash drive and the full log goes with it. If the app is launched from a
+read-only location, it falls back to a writable per-user data directory so it still runs.
 
 Schema:
 

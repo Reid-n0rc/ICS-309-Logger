@@ -1,7 +1,18 @@
 use rusqlite::{Connection, Result as SqlResult};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+/// The directory the app was launched from — where we keep the database so the
+/// whole log travels with a portable copy (e.g. on a USB flash drive).
 pub fn get_data_dir() -> PathBuf {
+    // Linux AppImage: the binary runs from a read-only mount (e.g.
+    // /tmp/.mount_xxx/usr/bin), so current_exe() is NOT where the .AppImage lives.
+    // The launcher exports $APPIMAGE with the real on-disk path of the .AppImage.
+    if let Ok(appimage) = std::env::var("APPIMAGE") {
+        if let Some(parent) = Path::new(&appimage).parent() {
+            return parent.to_path_buf();
+        }
+    }
+
     let exe = std::env::current_exe().expect("failed to get exe path");
     let exe_dir = exe.parent().expect("failed to get exe dir").to_path_buf();
 
@@ -22,8 +33,49 @@ pub fn get_data_dir() -> PathBuf {
     exe_dir
 }
 
+/// True if we can create files in `dir`.
+fn is_writable(dir: &Path) -> bool {
+    let probe = dir.join(".ics309_write_test");
+    match std::fs::File::create(&probe) {
+        Ok(_) => {
+            let _ = std::fs::remove_file(&probe);
+            true
+        }
+        Err(_) => false,
+    }
+}
+
+/// Per-user fallback data directory, used only when the portable location is not
+/// writable (e.g. the app is run directly from a read-only .dmg/AppImage mount).
+fn fallback_data_dir() -> PathBuf {
+    #[cfg(target_os = "windows")]
+    let base = std::env::var_os("APPDATA").map(PathBuf::from);
+
+    #[cfg(target_os = "macos")]
+    let base = std::env::var_os("HOME")
+        .map(|h| PathBuf::from(h).join("Library").join("Application Support"));
+
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let base = std::env::var_os("XDG_DATA_HOME")
+        .map(PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local").join("share")));
+
+    let dir = base
+        .unwrap_or_else(std::env::temp_dir)
+        .join("ICS-309-Logger");
+    let _ = std::fs::create_dir_all(&dir);
+    dir
+}
+
 pub fn get_db_path() -> PathBuf {
-    get_data_dir().join("ics309_data.db")
+    let dir = get_data_dir();
+    // Prefer the portable, next-to-executable location; fall back to a writable
+    // per-user directory if that location is read-only so the app still launches.
+    if is_writable(&dir) {
+        dir.join("ics309_data.db")
+    } else {
+        fallback_data_dir().join("ics309_data.db")
+    }
 }
 
 pub fn init_db() -> SqlResult<Connection> {

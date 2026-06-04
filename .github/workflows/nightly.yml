@@ -121,12 +121,56 @@ jobs:
         run: npm install
 
       - name: Build and upload
+        id: tauri
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }}
+
+      - name: Package portable Windows build
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "src-tauri/target/release" -Filter *.exe -File |
+                 Where-Object { $_.Name -notlike '*setup*' } |
+                 Select-Object -First 1
+          if (-not $exe) { throw "No portable .exe found in src-tauri/target/release" }
+          New-Item -ItemType Directory -Force -Path portable | Out-Null
+          Copy-Item $exe.FullName "portable/ICS-309 Logger.exe"
+          @"
+          ICS-309 Logger - Portable Windows build
+
+          No installation required. Double-click "ICS-309 Logger.exe" to run.
+          Copy this folder to a USB flash drive to run it from there; the database
+          (ics309_data.db) is created next to the executable.
+
+          Requires the Microsoft WebView2 runtime, preinstalled on Windows 11 and
+          most up-to-date Windows 10 systems. If the app will not start, install it:
+          https://developer.microsoft.com/microsoft-edge/webview2/
+          "@ | Set-Content -Path "portable/README.txt"
+          Compress-Archive -Path "portable/*" -DestinationPath "ICS-309-Logger_portable_windows_x64.zip" -Force
+
+      - name: Attach portable Windows build to release
+        if: matrix.platform == 'windows-latest'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const name = 'ICS-309-Logger_portable_windows_x64.zip';
+            const data = fs.readFileSync(name);
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.outputs.release_id }},
+              name,
+              data,
+              headers: {
+                'content-type': 'application/zip',
+                'content-length': data.length,
+              },
+            });
 
   # 3. Publish the draft release (flip draft -> published).
   publish-release:

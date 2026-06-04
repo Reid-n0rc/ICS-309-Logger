@@ -69,6 +69,7 @@ jobs:
         run: npm install
 
       - name: Build and publish release
+        id: tauri
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,11 +77,58 @@ jobs:
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'app-v__VERSION__' }}
           releaseName: "ICS-309 Logger ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}"
           releaseBody: |
-            ICS-309 Communications Logger — portable desktop build.
+            ICS-309 Communications Logger — runs without installing.
 
-            Download the installer/bundle for your platform from the assets below.
-            The app needs no installation and can be run from removable media; its
-            SQLite database is created next to the executable on first run.
+            **Just run it (no install):**
+            • **Windows** — `ICS-309-Logger_portable_windows_x64.zip` → unzip, double-click the .exe.
+            • **macOS** — open the `.dmg` and drag the app to your drive (or a folder), then run it.
+            • **Linux** — the `.AppImage`: `chmod +x` and run.
+
+            Installers (`.msi`/setup `.exe`, `.deb`, `.rpm`) are also provided if you prefer.
+            The SQLite database is created next to the app, so the whole log travels with it.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Package portable Windows build
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "src-tauri/target/release" -Filter *.exe -File |
+                 Where-Object { $_.Name -notlike '*setup*' } |
+                 Select-Object -First 1
+          if (-not $exe) { throw "No portable .exe found in src-tauri/target/release" }
+          New-Item -ItemType Directory -Force -Path portable | Out-Null
+          Copy-Item $exe.FullName "portable/ICS-309 Logger.exe"
+          @"
+          ICS-309 Logger - Portable Windows build
+
+          No installation required. Double-click "ICS-309 Logger.exe" to run.
+          Copy this folder to a USB flash drive to run it from there; the database
+          (ics309_data.db) is created next to the executable.
+
+          Requires the Microsoft WebView2 runtime, preinstalled on Windows 11 and
+          most up-to-date Windows 10 systems. If the app will not start, install it:
+          https://developer.microsoft.com/microsoft-edge/webview2/
+          "@ | Set-Content -Path "portable/README.txt"
+          Compress-Archive -Path "portable/*" -DestinationPath "ICS-309-Logger_portable_windows_x64.zip" -Force
+
+      - name: Attach portable Windows build to release
+        if: matrix.platform == 'windows-latest'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const name = 'ICS-309-Logger_portable_windows_x64.zip';
+            const data = fs.readFileSync(name);
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ steps.tauri.outputs.releaseId }},
+              name,
+              data,
+              headers: {
+                'content-type': 'application/zip',
+                'content-length': data.length,
+              },
+            });
