@@ -67,7 +67,7 @@ export default function StartupView({ onOpenEvent }: Props) {
                       <div className="font-medium text-gray-800">{ev.incident_name}</div>
                       <div className="text-xs text-gray-500 mt-0.5">
                         {ev.radio_network_name} · {ev.radio_operator}
-                        {ev.to_date && (
+                        {ev.closed && (
                           <span className="ml-2 text-red-500 font-medium">[Closed]</span>
                         )}
                       </div>

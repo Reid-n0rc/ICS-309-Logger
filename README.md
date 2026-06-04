@@ -117,16 +117,14 @@ See [Logging workflow](#logging-workflow) below for the full field-by-field flow
   edit or delete it.
 - **Export & print** (each export prompts for a save location)
   - **PDF** — a formatted ICS-309 matching the official layout, with fillable blank
-    cells and a signature field.
+    cells and a blank signature field that can be signed in a PDF reader (e.g. Adobe
+    Reader). Exporting never closes the incident.
   - **Excel** — an `.xlsx` workbook laid out like the ICS-309 form.
   - **FLdigi** — an `.flmsg`-style file for use with [FLdigi](http://www.w1hkj.com/).
   - **Print** — sends a formatted ICS-309 to the printer.
-- **Digital signatures** (Sign & Export) — sign the PDF two ways, separately or together:
-  - **Draw or type** a visible signature, placed in the signature box on every page.
-  - **Certificate (.p12/.pfx)** — embed a cryptographic PKCS#7 digital signature,
-    verifiable in a PDF reader (e.g. Acrobat shows “Signed and all signatures are valid”).
-- **Open / close incidents** — closing an incident records the *To* (stop) date/time
-  and returns to the startup screen. All dates/times can be edited manually.
+- **Open / close incidents** — an incident stays open until you press **Close Incident**,
+  which records the *To* (stop) date/time. A closed incident shows a **Reopen Incident**
+  button in its place. All dates/times can be edited manually.
 - **Lightweight local storage** — a single SQLite database file (`ics309_data.db`).
 - **Responsive UI** — adapts to desktop, tablet, Chromebook, and phone screens in both
   portrait and landscape; packageable for Android via Tauri's mobile target.

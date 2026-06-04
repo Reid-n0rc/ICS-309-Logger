@@ -48,7 +48,7 @@ export default function EventList({ onSelect, onBack }: Props) {
               </div>
               <div className="text-xs text-gray-400 text-right ml-4 flex-shrink-0">
                 <div>{ev.from_date} {ev.from_time}</div>
-                {ev.to_date && (
+                {ev.closed && (
                   <div className="text-red-500 font-medium">Closed</div>
                 )}
               </div>

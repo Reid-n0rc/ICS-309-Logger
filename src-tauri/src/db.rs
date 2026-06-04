@@ -83,7 +83,27 @@ pub fn init_db() -> SqlResult<Connection> {
     let conn = Connection::open(&db_path)?;
     conn.execute_batch("PRAGMA journal_mode=WAL;")?;
     init_schema(&conn)?;
+    migrate(&conn)?;
     Ok(conn)
+}
+
+/// Apply schema migrations to a database created by an older version.
+pub fn migrate(conn: &Connection) -> SqlResult<()> {
+    let has_closed: bool = conn
+        .query_row(
+            "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = 'closed'",
+            [],
+            |row| row.get::<_, i64>(0),
+        )
+        .map(|c| c > 0)
+        .unwrap_or(false);
+    if !has_closed {
+        conn.execute_batch(
+            "ALTER TABLE events ADD COLUMN closed INTEGER NOT NULL DEFAULT 0;
+             UPDATE events SET closed = 1 WHERE to_date IS NOT NULL;",
+        )?;
+    }
+    Ok(())
 }
 
 /// Create the schema on an existing connection. Separated from `init_db` so tests
@@ -102,6 +122,7 @@ pub fn init_schema(conn: &Connection) -> SqlResult<()> {
             from_time TEXT,
             to_date TEXT,
             to_time TEXT,
+            closed INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL
         );
 
