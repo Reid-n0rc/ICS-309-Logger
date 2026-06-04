@@ -1,0 +1,5 @@
+{
+  "hooks": {
+    "onSessionStart": "echo '=== SYSTEM AUTO-INJECTED CONTEXT ===' && cat .claudestate.md"
+  }
+}
