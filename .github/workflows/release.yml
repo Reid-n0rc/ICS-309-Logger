@@ -115,7 +115,7 @@ jobs:
 
       - name: Attach portable Windows build to release
         if: matrix.platform == 'windows-latest'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
