@@ -15,6 +15,7 @@ const SAMPLE_EVENT = {
   from_time: "0742",
   to_date: null,
   to_time: null,
+  closed: false,
   created_at: "2026-06-03 07:42:00",
 };
 
@@ -29,6 +30,7 @@ const SAMPLE_EVENTS = [
     from_time: "1300",
     to_date: "2026-05-28",
     to_time: "1645",
+    closed: true,
     created_at: "2026-05-28 13:00:00",
   },
 ];
@@ -57,8 +59,11 @@ function makeStub() {
         case "create_event":
           return Promise.resolve(event);
         case "update_event":
-        case "close_event":
           return Promise.resolve(event);
+        case "close_event":
+          return Promise.resolve({ ...event, closed: true });
+        case "reopen_event":
+          return Promise.resolve({ ...event, closed: false });
         case "get_log_entries":
           return Promise.resolve(entries);
         case "get_next_msg_num":

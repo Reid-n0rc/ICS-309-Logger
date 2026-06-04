@@ -18,6 +18,10 @@ chmod +x ICS-309*.AppImage
 ./ICS-309*.AppImage
 ```
 
+- **Android**: download `ICS-309-Logger_<version>_android.apk` and install it (enable
+  "install from unknown sources" for your browser/file manager). The UI adapts to phone
+  and tablet screens.
+
 ## Documentation
 
 Detailed documentation is on the project docs site:
