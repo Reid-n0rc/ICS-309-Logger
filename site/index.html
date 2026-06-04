@@ -112,6 +112,42 @@
       .dl-card .file { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; color: var(--muted); }
       .note { text-align: center; color: var(--muted); font-size: 14px; margin-top: 28px; }
 
+      /* Top nav */
+      nav {
+        background: #111827;
+        padding: 14px 0;
+      }
+      nav .wrap {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      nav .brand {
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        text-decoration: none;
+      }
+      nav a {
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 14px;
+      }
+      nav a:hover { color: #fff; }
+      nav .spacer { flex: 1; }
+      nav .btn-nav {
+        display: inline-block;
+        padding: 8px 18px;
+        border-radius: 7px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 14px;
+        background: var(--blue);
+        color: #fff !important;
+        transition: transform 0.08s ease, background 0.15s ease;
+      }
+      nav .btn-nav:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
       /* Footer */
       footer { padding: 40px 0; text-align: center; color: var(--muted); font-size: 14px; }
       footer a { color: var(--muted); }
@@ -123,6 +159,16 @@
     </style>
   </head>
   <body>
+    <nav>
+      <div class="wrap">
+        <a class="brand" href="index.html">ICS-309 Logger</a>
+        <a href="index.html">Home</a>
+        <a href="getting-started.html">Docs</a>
+        <span class="spacer"></span>
+        <a class="btn-nav" href="https://github.com/Reid-n0rc/ICS-309-Logger/releases/latest">Download</a>
+      </div>
+    </nav>
+
     <header class="hero">
       <div class="wrap">
         <span class="badge">Free &amp; open source · ICS 309</span>
@@ -134,6 +180,7 @@
         </p>
         <div class="cta-row">
           <a class="btn btn-primary" href="https://github.com/Reid-n0rc/ICS-309-Logger/releases/latest">Download</a>
+          <a class="btn btn-ghost" href="getting-started.html">Getting Started</a>
           <a class="btn btn-ghost" href="https://github.com/Reid-n0rc/ICS-309-Logger">View on GitHub</a>
         </div>
       </div>
@@ -232,9 +279,8 @@
         </p>
         <p class="note">
           Builds are unsigned, so macOS (Gatekeeper) and Windows (SmartScreen) may warn on
-          first launch — see the
-          <a href="https://github.com/Reid-n0rc/ICS-309-Logger#run-the-app-no-installation">README</a>
-          for the one-time steps.
+          first launch. On macOS, right-click the app and choose <strong>Open</strong>.
+          On Windows, choose <strong>More info → Run anyway</strong>.
         </p>
       </div>
     </section>
@@ -249,6 +295,7 @@
         <p>
           <a href="https://github.com/Reid-n0rc/ICS-309-Logger">Source</a> ·
           <a href="https://github.com/Reid-n0rc/ICS-309-Logger/releases">Releases</a> ·
+          <a href="getting-started.html">Docs</a> ·
           <a href="https://github.com/Reid-n0rc/ICS-309-Logger/issues">Issues</a>
         </p>
       </div>
