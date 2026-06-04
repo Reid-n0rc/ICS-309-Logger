@@ -91,8 +91,7 @@ npm run tauri dev      # launch the app
 
    The entry drops into the table below and the form resets for the next one.
 
-3. **Fix something.** Double-click any row to edit its fields or delete it. Drag the
-   divider above the table to resize the log area.
+3. **Fix something.** Double-click any row to edit its fields or delete it.
 
 4. **Export or print.** Use the menu bar: **Export PDF**, **Export Excel**, **Export FLdigi**, or
    **Print** to produce a formatted ICS-309.
@@ -114,8 +113,8 @@ See [Logging workflow](#logging-workflow) below for the full field-by-field flow
 - **Constant spell check** — the message field uses native browser spell check
   (red underline on misspellings, right-click for suggestions), just like a word
   processor or web form.
-- **Resizable, scrollable log table** — drag the divider to resize; double-click any
-  row to edit or delete it.
+- **Scrollable log table** — fills the window and scrolls; double-click any row to
+  edit or delete it.
 - **Export & print** (each export prompts for a save location)
   - **PDF** — a formatted ICS-309 matching the official layout, with fillable blank
     cells and a signature field.

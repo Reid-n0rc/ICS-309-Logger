@@ -30,12 +30,6 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
   const [showSignature, setShowSignature] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
 
-  // Resizable split
-  const [tableHeight, setTableHeight] = useState(320);
-  const dragging = useRef(false);
-  const dragStartY = useRef(0);
-  const dragStartH = useRef(0);
-
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,29 +105,6 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       console.error("FLdigi export failed:", err);
     }
   };
-
-  // Drag-to-resize logic
-  const onMouseDownHandle = (e: React.MouseEvent) => {
-    dragging.current = true;
-    dragStartY.current = e.clientY;
-    dragStartH.current = tableHeight;
-    e.preventDefault();
-  };
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!dragging.current) return;
-      const delta = dragStartY.current - e.clientY;
-      setTableHeight(Math.max(120, dragStartH.current + delta));
-    };
-    const onMouseUp = () => { dragging.current = false; };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -245,18 +216,10 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
         </div>
       )}
 
-      {/* Resize handle */}
-      <div
-        className="resize-handle no-print"
-        onMouseDown={onMouseDownHandle}
-        title="Drag to resize log area"
-      />
-
-      {/* Log table (resizable) */}
+      {/* Log table — fills the remaining window height and scrolls */}
       <div
         ref={tableContainerRef}
-        className="log-table-container flex-shrink-0 bg-white border-t border-gray-200"
-        style={{ height: tableHeight }}
+        className="log-table-container flex-1 min-h-0 bg-white border-t border-gray-200"
       >
         <LogTable
           entries={entries}
