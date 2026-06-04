@@ -18,11 +18,11 @@ chmod +x ICS-309*.AppImage
 ./ICS-309*.AppImage
 ```
 
-## Documentation (Wiki)
+## Documentation
 
-Detailed usage documentation, workflow notes, and screenshots are published on the project wiki site:
+Detailed documentation is on the project docs site:
 
-- **https://reid-n0rc.github.io/ICS-309-Logger/**
+- **[Getting Started](https://reid-n0rc.github.io/ICS-309-Logger/getting-started.html)** — full download &amp; run guide, 60-second quickstart, logging workflow, features, data storage, and development setup.
 
 ## Run from source
 
