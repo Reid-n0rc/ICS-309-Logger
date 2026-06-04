@@ -20,19 +20,6 @@ body {
   flex-direction: column;
 }
 
-/* Resizable split handle */
-.resize-handle {
-  height: 6px;
-  background: #d1d5db;
-  cursor: row-resize;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-
-.resize-handle:hover {
-  background: #6b7280;
-}
-
 /* Print styles — hide UI chrome, show only the ICS-309 form */
 @media print {
   body {
