@@ -12,13 +12,51 @@ executable, so the entire log travels with the drive.
 
 ## Getting Started
 
+### Download a build
+
+Pre-built bundles are published on the
+**[Releases page](https://github.com/Reid-n0rc/ICS-309-Logger/releases)** for macOS,
+Linux, and Windows:
+
+- **Latest stable** — the most recent `vX.Y.Z` release (recommended).
+- **Nightly** — the `nightly` pre-release is rebuilt from the latest commit on `main`
+  every time it changes; use it to test the newest features.
+
+Grab the file that matches your platform:
+
+| Platform | Download | Notes |
+|---|---|---|
+| **Windows** | `..._x64-setup.exe` or `..._x64_en-US.msi` | Either installer works. |
+| **macOS (Apple Silicon)** | `..._aarch64.dmg` | M1/M2/M3/M4 Macs. |
+| **macOS (Intel)** | `..._x64.dmg` | Older Intel Macs. |
+| **Linux (Debian/Ubuntu)** | `..._amd64.deb` | `sudo dpkg -i <file>.deb` |
+| **Linux (any distro)** | `..._amd64.AppImage` | `chmod +x` then run — no install needed. |
+| **Linux (Fedora/RHEL)** | `....x86_64.rpm` | `sudo rpm -i <file>.rpm` |
+
 ### Run the app
 
-**Using a released build:** copy the application (and, optionally, drop it on a USB
-drive) and double-click to launch. No installation required — the database
-`ics309_data.db` is created next to the executable on first run.
+**Windows** — run the `.exe`/`.msi` installer, then launch *ICS-309 Logger* from the
+Start menu. On first launch, SmartScreen may warn (the build is unsigned): click
+**More info → Run anyway**.
 
-**From source:**
+**macOS** — open the `.dmg` and drag *ICS-309 Logger* to Applications (or run it from
+the mounted volume). Because the build is unsigned, the first launch is blocked:
+**right-click the app → Open → Open**, or allow it under
+**System Settings → Privacy & Security**.
+
+**Linux** — install the `.deb`/`.rpm`, or make the `.AppImage` executable and run it:
+
+```bash
+chmod +x ICS-309*.AppImage
+./ICS-309*.AppImage
+```
+
+> **Portable use:** the app stores its data in a single SQLite file, `ics309_data.db`,
+> created next to the executable on first run. The AppImage (Linux) and the `.app`
+> (macOS) are self-contained — copy them to a USB drive and the whole log travels with
+> the drive, no installation required.
+
+### Run from source
 
 ```bash
 npm install            # one-time: install dependencies
