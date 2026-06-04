@@ -10,6 +10,53 @@ executable, so the entire log travels with the drive.
 
 ---
 
+## Getting Started
+
+### Run the app
+
+**Using a released build:** copy the application (and, optionally, drop it on a USB
+drive) and double-click to launch. No installation required — the database
+`ics309_data.db` is created next to the executable on first run.
+
+**From source:**
+
+```bash
+npm install            # one-time: install dependencies
+npm run tauri dev      # launch the app
+```
+
+> Requires [Node.js](https://nodejs.org/) 18+ and the [Rust](https://rustup.rs/)
+> stable toolchain. See [Development](#development) for full setup and how to build a
+> release binary.
+
+### Use it in 60 seconds
+
+1. **Start an event.** On the startup screen, click **New Event**, fill in *Incident
+   Name*, *Radio Network Name*, and *Radio Operator* (press `Enter` to move between
+   fields). Pressing `Enter` on the last field creates the event and stamps the start
+   time. Already have one? Click **Open Existing Event** or pick from **Recent Events**.
+
+2. **Log a transmission.** In the entry form at the top:
+   - Type the **From Call Sign/ID** → `Enter` (the From Msg # auto-fills for that call sign).
+   - Type the **To Call Sign/ID** → `Enter` (the To Msg # auto-fills).
+   - Type the **Message** (`Shift+Enter` for a new line; misspellings are underlined).
+   - Press `Enter` to log it. The time fills in automatically if you didn't set it.
+
+   The entry drops into the table below and the form resets for the next one.
+
+3. **Fix something.** Double-click any row to edit its fields or delete it. Drag the
+   divider above the table to resize the log area.
+
+4. **Export or print.** Use the menu bar: **Export PDF**, **Export FLdigi**, or
+   **Print** to produce a formatted ICS-309.
+
+5. **Close out.** Click **Close Incident** to record the stop time and return to the
+   startup screen. (Start/stop times remain editable via **Edit Event**.)
+
+See [Logging workflow](#logging-workflow) below for the full field-by-field flow.
+
+---
+
 ## Features
 
 - **Event-based workflow** — create a new event or reopen an existing one on startup.
