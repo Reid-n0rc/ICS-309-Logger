@@ -11,3 +11,5 @@ src-tauri/gen/apple
 
 # Pages: screenshots are copied in at deploy time
 site/screenshots
+# Claude Agent State Tracking
+.claudestate.md
