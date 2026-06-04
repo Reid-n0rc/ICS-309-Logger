@@ -9,8 +9,17 @@ use std::sync::Mutex;
 pub fn run() {
     let conn = db::init_db().expect("failed to initialize database");
 
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+    #[allow(unused_mut)]
+    let mut builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+
+    // On Android the dialog plugin's save() returns a SAF content:// URI that
+    // std::fs cannot write to; this plugin provides a native save dialog + write.
+    #[cfg(target_os = "android")]
+    {
+        builder = builder.plugin(tauri_plugin_android_fs::init());
+    }
+
+    builder
         .manage(DbState(Mutex::new(conn)))
         .invoke_handler(tauri::generate_handler![
             commands::create_event,
@@ -28,6 +37,7 @@ pub fn run() {
             commands::get_db_path_str,
             commands::write_file,
             commands::read_file,
+            commands::save_file_dialog,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

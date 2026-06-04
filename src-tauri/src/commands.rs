@@ -448,10 +448,52 @@ pub fn write_file(path: String, contents: Vec<u8>) -> CmdResult<()> {
 }
 
 /// Read raw bytes from an absolute path chosen by the user via an open dialog.
-/// Used to load a signing certificate (.p12/.pfx) for digital signatures.
 #[tauri::command]
 pub fn read_file(path: String) -> CmdResult<Vec<u8>> {
     std::fs::read(&path).map_err(e)
+}
+
+/// Save `contents` to a user-chosen location via a native save dialog.
+///
+/// Android only: the dialog plugin's `save()` returns a Storage Access Framework
+/// `content://` URI that `std::fs::write` (used by [`write_file`]) cannot write to,
+/// which produced a created-but-unopenable PDF. The android-fs plugin shows the
+/// native save dialog and writes to the granted URI. Desktop platforms keep using
+/// the dialog plugin + [`write_file`] and never call this.
+///
+/// Returns the saved file name, or `None` if the user cancelled.
+#[tauri::command]
+pub async fn save_file_dialog(
+    app: tauri::AppHandle,
+    name: String,
+    mime: String,
+    contents: Vec<u8>,
+) -> CmdResult<Option<String>> {
+    #[cfg(target_os = "android")]
+    {
+        use std::io::Write;
+        use tauri_plugin_android_fs::AndroidFsExt;
+
+        let api = app.android_fs_async();
+        let selected = api
+            .file_picker()
+            .save_file(None, &name, Some(mime.as_str()), false)
+            .await
+            .map_err(e)?;
+        match selected {
+            Some(uri) => {
+                let mut file = api.open_file_writable(&uri).await.map_err(e)?;
+                file.write_all(&contents).map_err(e)?;
+                Ok(Some(name))
+            }
+            None => Ok(None),
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = (app, name, mime, contents);
+        Err("save_file_dialog is only available on Android".to_string())
+    }
 }
 
 // ── Tests: exercise every feature against an in-memory DB (runs on each OS) ──────
