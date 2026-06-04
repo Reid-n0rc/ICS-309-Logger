@@ -1,8 +1,8 @@
 # ICS-309 Communications Logger
 
 A cross-platform desktop application for capturing radio communications data and
-producing a [FEMA **ICS-309 Communications Log**](https://training.fema.gov/icsresource/icsforms.aspx).
-Built with [Tauri 2](https://tauri.app/), React, and SQLite.
+producing an **ICS-309 Communications Log** (the Incident Command System
+communications log form). Built with [Tauri 2](https://tauri.app/), React, and SQLite.
 
 The app is **portable** — it does not require installation and can be run from
 removable media such as a USB flash drive. Its database lives next to the
