@@ -295,8 +295,9 @@ npm run tauri dev      # launch the app</code></pre>
             <strong>Export FLdigi</strong>, or <strong>Print</strong> to produce a formatted ICS-309.
           </li>
           <li>
-            <strong>Close out.</strong> Click <strong>Close Incident</strong> to record the stop time and return to the
-            startup screen. (Start/stop times remain editable via <strong>Edit Event</strong>.)
+            <strong>Close out.</strong> The incident stays open until you click <strong>Close Incident</strong>, which
+            records the stop time. A closed incident shows a <strong>Reopen Incident</strong> button in its place.
+            (Exporting never closes the incident; start/stop times remain editable via <strong>Edit Event</strong>.)
           </li>
         </ol>
 
@@ -358,22 +359,17 @@ npm run tauri dev      # launch the app</code></pre>
           <li>
             <strong>Export &amp; print</strong> (each export prompts for a save location):
             <ul>
-              <li><strong>PDF</strong> — a formatted ICS-309 matching the official layout, with fillable blank cells and a signature field.</li>
+              <li><strong>PDF</strong> — a formatted ICS-309 matching the official layout, with fillable blank cells
+                and a blank signature field that can be signed in a PDF reader (e.g. Adobe Reader). Exporting never
+                closes the incident.</li>
               <li><strong>Excel</strong> — an <code>.xlsx</code> workbook laid out like the ICS-309 form.</li>
               <li><strong>FLdigi</strong> — an <code>.flmsg</code>-style file for use with <a href="http://www.w1hkj.com/">FLdigi</a>.</li>
               <li><strong>Print</strong> — sends a formatted ICS-309 to the printer.</li>
             </ul>
           </li>
-          <li>
-            <strong>Digital signatures</strong> (Sign &amp; Export) — sign the PDF two ways, separately or together:
-            <ul>
-              <li><strong>Draw or type</strong> a visible signature, placed in the signature box on every page.</li>
-              <li><strong>Certificate (.p12/.pfx)</strong> — embed a cryptographic PKCS#7 digital signature,
-                verifiable in a PDF reader (e.g. Acrobat shows "Signed and all signatures are valid").</li>
-            </ul>
-          </li>
-          <li><strong>Open / close incidents</strong> — closing an incident records the <em>To</em> (stop) date/time
-            and returns to the startup screen. All dates/times can be edited manually.</li>
+          <li><strong>Open / close incidents</strong> — an incident stays open until you press <strong>Close Incident</strong>,
+            which records the <em>To</em> (stop) date/time. A closed incident shows a <strong>Reopen Incident</strong> button
+            in its place. All dates/times can be edited manually.</li>
           <li><strong>Lightweight local storage</strong> — a single SQLite database file (<code>ics309_data.db</code>).</li>
           <li><strong>Responsive UI</strong> — adapts to desktop, tablet, Chromebook, and phone screens in both
             portrait and landscape; packageable for Android via Tauri's mobile target.</li>
