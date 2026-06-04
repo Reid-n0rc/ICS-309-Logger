@@ -1,0 +1,130 @@
+name: Verify
+
+# On every commit and PR, verify on macOS, Linux, and Windows that:
+#   1. the frontend type-checks and builds,
+#   2. all backend feature tests pass (cargo test), and
+#   3. the actual app binary launches and initializes its database (smoke test).
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-22.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libxdo-dev \
+            libgtk-3-dev \
+            xvfb \
+            dbus-x11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust dependency cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run backend feature tests
+        working-directory: ./src-tauri
+        run: cargo test --locked
+
+      - name: Build app binary
+        working-directory: ./src-tauri
+        run: cargo build --locked
+
+      - name: Smoke test — app launches (Linux)
+        if: runner.os == 'Linux'
+        env:
+          WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+          WEBKIT_DISABLE_DMABUF_RENDERER: "1"
+        run: |
+          bin="src-tauri/target/debug/ics-309-logger"
+          db="src-tauri/target/debug/ics309_data.db"
+          rm -f "$db"
+          xvfb-run -a "$bin" &
+          pid=$!
+          sleep 12
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "::error::App exited prematurely on Linux"; exit 1
+          fi
+          if [ ! -f "$db" ]; then
+            echo "::error::Database was not created on Linux"; kill "$pid"; exit 1
+          fi
+          kill "$pid" 2>/dev/null || true
+          echo "Linux smoke test passed: app ran and created its database."
+
+      - name: Smoke test — app launches (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          bin="src-tauri/target/debug/ics-309-logger"
+          db="src-tauri/target/debug/ics309_data.db"
+          rm -f "$db"
+          "$bin" &
+          pid=$!
+          sleep 12
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "::error::App exited prematurely on macOS"; exit 1
+          fi
+          if [ ! -f "$db" ]; then
+            echo "::error::Database was not created on macOS"; kill "$pid"; exit 1
+          fi
+          kill "$pid" 2>/dev/null || true
+          echo "macOS smoke test passed: app ran and created its database."
+
+      - name: Smoke test — app launches (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $bin = "src-tauri/target/debug/ics-309-logger.exe"
+          $db  = "src-tauri/target/debug/ics309_data.db"
+          Remove-Item $db -ErrorAction SilentlyContinue
+          $p = Start-Process -FilePath $bin -PassThru
+          Start-Sleep -Seconds 12
+          if ($p.HasExited) {
+            Write-Error "App exited prematurely on Windows (exit code $($p.ExitCode))"; exit 1
+          }
+          if (-not (Test-Path $db)) {
+            Stop-Process -Id $p.Id -Force
+            Write-Error "Database was not created on Windows"; exit 1
+          }
+          Stop-Process -Id $p.Id -Force
+          Write-Host "Windows smoke test passed: app ran and created its database."

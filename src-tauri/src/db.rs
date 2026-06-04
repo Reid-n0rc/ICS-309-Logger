@@ -81,10 +81,16 @@ pub fn get_db_path() -> PathBuf {
 pub fn init_db() -> SqlResult<Connection> {
     let db_path = get_db_path();
     let conn = Connection::open(&db_path)?;
+    conn.execute_batch("PRAGMA journal_mode=WAL;")?;
+    init_schema(&conn)?;
+    Ok(conn)
+}
 
+/// Create the schema on an existing connection. Separated from `init_db` so tests
+/// can build an in-memory database with the exact production schema.
+pub fn init_schema(conn: &Connection) -> SqlResult<()> {
     conn.execute_batch(
         "
-        PRAGMA journal_mode=WAL;
         PRAGMA foreign_keys=ON;
 
         CREATE TABLE IF NOT EXISTS events (
@@ -120,7 +126,5 @@ pub fn init_db() -> SqlResult<Connection> {
             FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
         );
         ",
-    )?;
-
-    Ok(conn)
+    )
 }
