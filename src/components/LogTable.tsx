@@ -18,23 +18,45 @@ export default function LogTable({ entries, onDoubleClick }: Props) {
     <table className="w-full text-sm border-collapse min-w-max">
       <thead className="sticky top-0 bg-gray-100 z-10">
         <tr>
-          <th className="px-3 py-2 text-left font-semibold text-gray-600 border-b border-gray-300 whitespace-nowrap w-20">
+          <th
+            rowSpan={2}
+            className="px-3 py-1.5 text-left align-bottom font-semibold text-gray-600 border-b border-gray-300 whitespace-nowrap w-20"
+          >
             Time
+            <br />
+            (24:00)
           </th>
-          <th className="px-3 py-2 text-left font-semibold text-gray-600 border-b border-gray-300 whitespace-nowrap w-28">
-            From CS/ID
+          <th
+            colSpan={2}
+            className="px-3 py-1.5 text-center font-semibold text-gray-600 border-b border-l border-gray-300"
+          >
+            FROM
           </th>
-          <th className="px-3 py-2 text-left font-semibold text-gray-600 border-b border-gray-300 w-16">
-            Msg #
+          <th
+            colSpan={2}
+            className="px-3 py-1.5 text-center font-semibold text-gray-600 border-b border-l border-gray-300"
+          >
+            TO
           </th>
-          <th className="px-3 py-2 text-left font-semibold text-gray-600 border-b border-gray-300 whitespace-nowrap w-28">
-            To CS/ID
-          </th>
-          <th className="px-3 py-2 text-left font-semibold text-gray-600 border-b border-gray-300 w-16">
-            Msg #
-          </th>
-          <th className="px-3 py-2 text-left font-semibold text-gray-600 border-b border-gray-300">
+          <th
+            rowSpan={2}
+            className="px-3 py-1.5 text-left align-bottom font-semibold text-gray-600 border-b border-l border-gray-300"
+          >
             Message
+          </th>
+        </tr>
+        <tr>
+          <th className="px-3 py-1 text-left font-medium text-gray-500 border-b border-l border-gray-300 whitespace-nowrap w-28">
+            Call Sign/ID
+          </th>
+          <th className="px-3 py-1 text-left font-medium text-gray-500 border-b border-gray-300 w-16">
+            Msg #
+          </th>
+          <th className="px-3 py-1 text-left font-medium text-gray-500 border-b border-l border-gray-300 whitespace-nowrap w-28">
+            Call Sign/ID
+          </th>
+          <th className="px-3 py-1 text-left font-medium text-gray-500 border-b border-gray-300 w-16">
+            Msg #
           </th>
         </tr>
       </thead>
@@ -51,19 +73,19 @@ export default function LogTable({ entries, onDoubleClick }: Props) {
             <td className="px-3 py-1.5 font-mono text-gray-700 whitespace-nowrap">
               {entry.time_value || ""}
             </td>
-            <td className="px-3 py-1.5 font-mono text-gray-700 uppercase whitespace-nowrap">
+            <td className="px-3 py-1.5 font-mono text-gray-700 uppercase whitespace-nowrap border-l border-gray-200">
               {entry.from_callsign || ""}
             </td>
             <td className="px-3 py-1.5 font-mono text-gray-700 text-center">
               {entry.from_msg_num || ""}
             </td>
-            <td className="px-3 py-1.5 font-mono text-gray-700 uppercase whitespace-nowrap">
+            <td className="px-3 py-1.5 font-mono text-gray-700 uppercase whitespace-nowrap border-l border-gray-200">
               {entry.to_callsign || ""}
             </td>
             <td className="px-3 py-1.5 font-mono text-gray-700 text-center">
               {entry.to_msg_num || ""}
             </td>
-            <td className="px-3 py-1.5 text-gray-800 whitespace-pre-wrap break-words max-w-md">
+            <td className="px-3 py-1.5 text-gray-800 whitespace-pre-wrap break-words max-w-md border-l border-gray-200">
               {entry.message || ""}
             </td>
           </tr>
