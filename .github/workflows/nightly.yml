@@ -1,0 +1,140 @@
+name: Nightly Build
+
+# On every push to main, build all platforms and publish them to a single rolling
+# "nightly" pre-release (recreated each run so it always tracks the latest commit).
+# Stable, versioned releases are handled separately by release.yml (on v* tags).
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  # 1. Recreate the rolling "nightly" release as a fresh draft at the current commit.
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create.outputs.result }}
+    steps:
+      - name: Recreate nightly release
+        id: create
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            // Delete the existing nightly release (if any) and its tag.
+            try {
+              const existing = await github.rest.repos.getReleaseByTag({ owner, repo, tag: 'nightly' });
+              await github.rest.repos.deleteRelease({ owner, repo, release_id: existing.data.id });
+            } catch (e) { /* no existing release */ }
+            try {
+              await github.rest.git.deleteRef({ owner, repo, ref: 'tags/nightly' });
+            } catch (e) { /* no existing tag */ }
+
+            const sha = context.sha.substring(0, 7);
+            const { data } = await github.rest.repos.createRelease({
+              owner, repo,
+              tag_name: 'nightly',
+              target_commitish: context.sha,
+              name: `Nightly Build (${sha})`,
+              body: [
+                'Automated rolling build of the latest commit on `main`.',
+                '',
+                `Commit: ${context.sha}`,
+                '',
+                'Download the bundle for your platform below. The app needs no',
+                'installation and can run from removable media; its SQLite database',
+                'is created next to the executable on first run.',
+                '',
+                '> ⚠️ Pre-release / unsigned — macOS and Windows may warn before launch.',
+              ].join('\n'),
+              draft: true,
+              prerelease: true,
+            });
+            return data.id;
+
+  # 2. Build each platform and upload artifacts to the draft release.
+  build-tauri:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest # Apple Silicon
+            args: "--target aarch64-apple-darwin"
+          - platform: macos-latest # Intel
+            args: "--target x86_64-apple-darwin"
+          - platform: ubuntu-22.04
+            args: ""
+          - platform: windows-latest
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux system dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libssl-dev \
+            libxdo-dev \
+            libgtk-3-dev
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust dependency cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build and upload
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ needs.create-release.outputs.release_id }}
+          args: ${{ matrix.args }}
+
+  # 3. Publish the draft release (flip draft -> published).
+  publish-release:
+    needs: [create-release, build-tauri]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish nightly release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            await github.rest.repos.updateRelease({
+              owner, repo,
+              release_id: ${{ needs.create-release.outputs.release_id }},
+              draft: false,
+              prerelease: true,
+            });

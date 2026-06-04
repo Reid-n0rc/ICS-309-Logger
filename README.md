@@ -228,14 +228,23 @@ npm run tauri build
 The bundled application is written to `src-tauri/target/release/` (and platform
 bundles under `src-tauri/target/release/bundle/`).
 
-### Automated releases (GitHub Actions)
+### CI/CD (GitHub Actions)
 
-The [`.github/workflows/release.yml`](.github/workflows/release.yml) workflow builds
-the app for **macOS (Apple Silicon + Intel), Linux, and Windows** using
-[`tauri-action`](https://github.com/tauri-apps/tauri-action) and attaches the bundles
-to a GitHub Release.
+Three workflows drive continuous integration and delivery. All builds target
+**macOS (Apple Silicon + Intel), Linux, and Windows** via
+[`tauri-action`](https://github.com/tauri-apps/tauri-action).
 
-To cut a release:
+| Workflow | Trigger | What it does |
+|---|---|---|
+| [`ci.yml`](.github/workflows/ci.yml) | Every push & PR (all branches) | Type-check, frontend build, and `cargo check` — fast feedback on every commit. |
+| [`nightly.yml`](.github/workflows/nightly.yml) | Every push to `main` | Builds all platforms and publishes them to a single rolling **`nightly`** pre-release, recreated each run so it always tracks the latest commit. |
+| [`release.yml`](.github/workflows/release.yml) | Push of a `v*` tag (or manual dispatch) | Builds all platforms and creates a **stable, versioned** GitHub Release (as a draft to review before publishing). |
+
+**Continuous builds:** every commit to `main` produces downloadable installers on the
+[Releases page](https://github.com/Reid-n0rc/ICS-309-Logger/releases) under the
+`nightly` pre-release.
+
+**Cutting a stable release:**
 
 1. Bump the version in `src-tauri/tauri.conf.json` (and `package.json`).
 2. Tag and push:
@@ -243,12 +252,11 @@ To cut a release:
    git tag v0.1.0
    git push origin v0.1.0
    ```
-3. The workflow builds every platform and creates a **draft** GitHub Release with the
-   installers/bundles attached. Review the draft and click **Publish**.
+3. `release.yml` builds every platform and creates a **draft** Release with the bundles
+   attached. Review it and click **Publish**.
 
-You can also trigger it manually from the **Actions** tab (**Run workflow**); it will
-use the version from `tauri.conf.json`. No signing certificates are configured, so the
-macOS/Windows bundles are unsigned — users may need to bypass Gatekeeper/SmartScreen.
+> No signing certificates are configured, so the macOS/Windows bundles are unsigned —
+> users may need to bypass Gatekeeper/SmartScreen on first launch.
 
 ### Type-check / compile checks
 
