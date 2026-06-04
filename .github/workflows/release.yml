@@ -26,7 +26,7 @@ jobs:
             args: "--target x86_64-apple-darwin"
           - platform: ubuntu-22.04
             args: ""
-          - platform: windows-latest
+          - platform: windows-2025
             args: ""
 
     runs-on: ${{ matrix.platform }}
@@ -91,7 +91,7 @@ jobs:
           args: ${{ matrix.args }}
 
       - name: Package portable Windows build
-        if: matrix.platform == 'windows-latest'
+        if: matrix.platform == 'windows-2025'
         shell: pwsh
         run: |
           $exe = Get-ChildItem "src-tauri/target/release" -Filter *.exe -File |
@@ -114,7 +114,7 @@ jobs:
           Compress-Archive -Path "portable/*" -DestinationPath "ICS-309-Logger_portable_windows_x64.zip" -Force
 
       - name: Attach portable Windows build to release
-        if: matrix.platform == 'windows-latest'
+        if: matrix.platform == 'windows-2025'
         uses: actions/github-script@v8
         with:
           script: |
