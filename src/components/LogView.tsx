@@ -5,6 +5,7 @@ import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
 import { exportIcs309Pdf } from "../lib/exportPdf";
+import { saveBytesWithDialog } from "../lib/saveFile";
 
 interface Props {
   event: Event;
@@ -71,8 +72,12 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
     }
   };
 
-  const handleExportPdf = () => {
-    exportIcs309Pdf(event, entries);
+  const handleExportPdf = async () => {
+    try {
+      await exportIcs309Pdf(event, entries);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    }
   };
 
   const handlePrint = () => {
@@ -88,15 +93,9 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
   const handleExportFldigi = async () => {
     try {
       const content = await invoke<string>("generate_fldigi_export", { eventId: event.id });
-      const blob = new Blob([content], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `ICS309-${event.incident_name.replace(/\s+/g, "_")}.flmsg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const filename = `ICS309-${event.incident_name.replace(/\s+/g, "_")}.flmsg`;
+      const bytes = new TextEncoder().encode(content);
+      await saveBytesWithDialog(filename, [{ name: "FLdigi Message", extensions: ["flmsg"] }], bytes);
     } catch (err) {
       console.error("FLdigi export failed:", err);
     }

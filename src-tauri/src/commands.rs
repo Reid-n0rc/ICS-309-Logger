@@ -418,6 +418,13 @@ pub fn get_db_path_str() -> String {
     crate::db::get_db_path().to_string_lossy().to_string()
 }
 
+/// Write raw bytes to an absolute path chosen by the user via a save dialog.
+/// Used by the PDF / FLdigi exports so the user controls the file name and location.
+#[tauri::command]
+pub fn write_file(path: String, contents: Vec<u8>) -> CmdResult<()> {
+    std::fs::write(&path, &contents).map_err(e)
+}
+
 // ── Tests: exercise every feature against an in-memory DB (runs on each OS) ──────
 
 #[cfg(test)]
