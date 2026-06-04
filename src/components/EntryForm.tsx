@@ -146,7 +146,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
       <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
         New Log Entry
       </div>
-      <div className="flex gap-2 items-start">
+      <div className="flex flex-wrap gap-2 items-start">
         {/* Time */}
         <div className="flex-shrink-0" style={{ width: 72 }}>
           <label className="block text-xs text-gray-500 mb-1">Time (24h)</label>
@@ -230,7 +230,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
         </div>
 
         {/* Message */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-[200px]">
           <label className="block text-xs text-gray-500 mb-1">
             Message <span className="font-normal text-gray-400">(Enter to submit · Shift+Enter for new line)</span>
           </label>
@@ -246,7 +246,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
         </div>
 
         {/* Submit button */}
-        <div className="flex-shrink-0 mt-5">
+        <div className="flex-shrink-0 mt-1 sm:mt-5">
           <button
             onClick={submitEntry}
             className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors whitespace-nowrap"

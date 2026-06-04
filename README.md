@@ -128,6 +128,8 @@ See [Logging workflow](#logging-workflow) below for the full field-by-field flow
 - **Open / close incidents** — closing an incident records the *To* (stop) date/time
   and returns to the startup screen. All dates/times can be edited manually.
 - **Lightweight local storage** — a single SQLite database file (`ics309_data.db`).
+- **Responsive UI** — adapts to desktop, tablet, Chromebook, and phone screens in both
+  portrait and landscape; packageable for Android via Tauri's mobile target.
 
 ---
 
@@ -282,11 +284,30 @@ npm run tauri build
 The bundled application is written to `src-tauri/target/release/` (and platform
 bundles under `src-tauri/target/release/bundle/`).
 
+### Building for Android
+
+The UI is responsive (phone, tablet, and Chromebook, in portrait or landscape), and the
+app can be packaged for Android via Tauri's mobile target.
+
+CI builds an APK automatically — run the **Android Build** workflow
+([`android.yml`](.github/workflows/android.yml)) from the Actions tab (or push a `v*`
+tag) and download the APK artifact.
+
+To build locally you need the Android toolchain (Android Studio / SDK + NDK, JDK 17):
+
+```bash
+# with ANDROID_HOME and NDK_HOME set and Android rust targets installed
+npm run tauri android init        # one-time, generates src-tauri/gen/android
+npm run tauri android dev         # run on a device/emulator
+npm run tauri android build       # build an APK/AAB
+```
+
 ### CI/CD (GitHub Actions)
 
-Four workflows drive continuous integration and delivery. Builds target
+Five workflows drive continuous integration and delivery. Desktop builds target
 **macOS (Apple Silicon + Intel), Linux, and Windows** via
-[`tauri-action`](https://github.com/tauri-apps/tauri-action).
+[`tauri-action`](https://github.com/tauri-apps/tauri-action); a separate workflow builds
+**Android**.
 
 | Workflow | Trigger | What it does |
 |---|---|---|
@@ -294,6 +315,7 @@ Four workflows drive continuous integration and delivery. Builds target
 | [`nightly.yml`](.github/workflows/nightly.yml) | Every push to `main` | Builds all platforms and publishes them to a single rolling **`nightly`** pre-release, recreated each run so it always tracks the latest commit. |
 | [`release.yml`](.github/workflows/release.yml) | Push of a `v*` tag (or manual dispatch) | Builds all platforms and creates a **stable, versioned** GitHub Release (as a draft to review before publishing). |
 | [`screenshots.yml`](.github/workflows/screenshots.yml) | Push to `main` touching GUI source | Regenerates the README screenshots from the built UI and commits any changes back (auto-commit carries `[skip ci]`, so it doesn't trigger rebuilds). |
+| [`android.yml`](.github/workflows/android.yml) | Manual dispatch or `v*` tag | Sets up the Android SDK/NDK and builds a debug APK, uploaded as an artifact. |
 
 **Cross-OS verification.** Every feature (event lifecycle, log entries, per-call-sign
 auto message numbering, FLdigi export) is covered by Rust integration tests that run on
