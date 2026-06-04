@@ -7,6 +7,7 @@ export interface Event {
   from_time: string | null;
   to_date: string | null;
   to_time: string | null;
+  closed: boolean;
   created_at: string;
 }
 

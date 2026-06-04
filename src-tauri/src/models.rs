@@ -10,6 +10,9 @@ pub struct Event {
     pub from_time: Option<String>,
     pub to_date: Option<String>,
     pub to_time: Option<String>,
+    /// Whether the incident has been explicitly closed (independent of the operational
+    /// period end, which an export may fill in without closing the incident).
+    pub closed: bool,
     pub created_at: String,
 }
 

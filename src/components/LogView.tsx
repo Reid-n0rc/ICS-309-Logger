@@ -4,7 +4,6 @@ import { Event, LogEntry, UpdateEventInput } from "../types";
 import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
-import SignatureModal from "./SignatureModal";
 import { exportIcs309Pdf } from "../lib/exportPdf";
 import { exportIcs309Excel } from "../lib/exportExcel";
 import { saveBytesWithDialog } from "../lib/saveFile";
@@ -28,7 +27,6 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [showEventEdit, setShowEventEdit] = useState(false);
-  const [showSignature, setShowSignature] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -144,10 +142,6 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
     }
   };
 
-  const handleOpenSignature = async () => {
-    await ensureEndPeriod();
-    setShowSignature(true);
-  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -159,7 +153,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             <span className="text-gray-400 text-xs ml-3 hidden sm:inline">{event.radio_network_name}</span>
             <span className="text-gray-400 text-xs ml-2 hidden md:inline">· {event.radio_operator}</span>
           </div>
-          {event.to_date && (
+          {event.closed && (
             <span className="px-2 py-0.5 bg-red-600 text-white text-xs rounded font-semibold">
               CLOSED
             </span>
@@ -173,12 +167,6 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
           >
             Export PDF
-          </button>
-          <button
-            onClick={handleOpenSignature}
-            className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
-          >
-            Sign &amp; Export
           </button>
           <button
             onClick={handleExportExcel}
@@ -205,7 +193,14 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             Edit Event
           </button>
           <div className="w-px h-5 bg-gray-600 mx-1" />
-          {!confirmClose ? (
+          {event.closed ? (
+            <button
+              onClick={handleReopenIncident}
+              className="px-3 py-1.5 text-xs bg-yellow-600 hover:bg-yellow-500 rounded font-semibold transition-colors"
+            >
+              Reopen Incident
+            </button>
+          ) : !confirmClose ? (
             <button
               onClick={() => setConfirmClose(true)}
               className="px-3 py-1.5 text-xs bg-red-700 hover:bg-red-600 rounded transition-colors"
@@ -252,16 +247,10 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       </div>
 
       {/* Entry form (fixed top) */}
-      {!event.to_date && <EntryForm eventId={event.id} onEntryAdded={handleEntryAdded} />}
-      {event.to_date && (
-        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800 flex items-center justify-between flex-shrink-0">
-          <span>This incident is closed. Log entries are read-only.</span>
-          <button
-            onClick={handleReopenIncident}
-            className="px-3 py-1 text-xs bg-yellow-600 text-white rounded font-semibold hover:bg-yellow-700 transition-colors"
-          >
-            Reopen Incident
-          </button>
+      {!event.closed && <EntryForm eventId={event.id} onEntryAdded={handleEntryAdded} />}
+      {event.closed && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800 flex-shrink-0">
+          This incident is closed. Log entries are read-only — use <strong>Reopen Incident</strong> to resume logging.
         </div>
       )}
 
@@ -296,11 +285,6 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
           }}
           onClose={() => setShowEventEdit(false)}
         />
-      )}
-
-      {/* Sign & export modal */}
-      {showSignature && (
-        <SignatureModal event={event} entries={entries} onClose={() => setShowSignature(false)} />
       )}
     </div>
   );

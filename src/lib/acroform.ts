@@ -91,32 +91,7 @@ export function addEmptySignatureField(pdfDoc: PDFDocument, fields: Ics309Fields
   acro.dict.set(PDFName.of("SigFlags"), PDFNumber.of(3));
 }
 
-/** Draw a PNG signature image inside the signature box on every page. */
-export async function embedSignatureImage(
-  pdfDoc: PDFDocument,
-  fields: Ics309Fields,
-  pngBytes: Uint8Array
-): Promise<void> {
-  const png = await pdfDoc.embedPng(pngBytes);
-  const pages = pdfDoc.getPages();
-  for (const sw of fields.signatureWidgets) {
-    const pageIdx = sw.page - 1;
-    if (pageIdx < 0 || pageIdx >= pages.length) continue;
-    const box = toRect(pages, pageIdx, sw.x, sw.y, sw.w, sw.h);
-    // Fit the image within the box, preserving aspect ratio.
-    const scale = Math.min(box.width / png.width, box.height / png.height);
-    const w = png.width * scale;
-    const h = png.height * scale;
-    pages[pageIdx].drawImage(png, {
-      x: box.x + (box.width - w) / 2,
-      y: box.y + (box.height - h) / 2,
-      width: w,
-      height: h,
-    });
-  }
-}
-
-/** Unsigned export: fillable cells + an empty signature field. */
+/** Fillable cells + a blank signature field (signable in a PDF reader). */
 export async function addAcroFields(
   pdfBytes: Uint8Array,
   fields: Ics309Fields

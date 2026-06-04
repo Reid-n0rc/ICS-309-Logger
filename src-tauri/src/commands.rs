@@ -34,7 +34,7 @@ fn now_ts() -> String {
 fn fetch_event(conn: &Connection, id: i64) -> SqlResult<Event> {
     conn.query_row(
         "SELECT id, incident_name, radio_network_name, radio_operator,
-                from_date, from_time, to_date, to_time, created_at
+                from_date, from_time, to_date, to_time, closed, created_at
          FROM events WHERE id = ?1",
         params![id],
         |row| {
@@ -47,7 +47,8 @@ fn fetch_event(conn: &Connection, id: i64) -> SqlResult<Event> {
                 from_time: row.get(5)?,
                 to_date: row.get(6)?,
                 to_time: row.get(7)?,
-                created_at: row.get(8)?,
+                closed: row.get::<_, i64>(8)? != 0,
+                created_at: row.get(9)?,
             })
         },
     )
@@ -95,7 +96,7 @@ fn create_event_impl(conn: &Connection, input: &CreateEventInput) -> SqlResult<E
 fn get_events_impl(conn: &Connection) -> SqlResult<Vec<Event>> {
     let mut stmt = conn.prepare(
         "SELECT id, incident_name, radio_network_name, radio_operator,
-                from_date, from_time, to_date, to_time, created_at
+                from_date, from_time, to_date, to_time, closed, created_at
          FROM events ORDER BY created_at DESC, id DESC",
     )?;
     let rows = stmt
@@ -109,7 +110,8 @@ fn get_events_impl(conn: &Connection) -> SqlResult<Vec<Event>> {
                 from_time: row.get(5)?,
                 to_date: row.get(6)?,
                 to_time: row.get(7)?,
-                created_at: row.get(8)?,
+                closed: row.get::<_, i64>(8)? != 0,
+                created_at: row.get(9)?,
             })
         })?
         .collect::<SqlResult<Vec<_>>>()?;
@@ -136,16 +138,22 @@ fn update_event_impl(conn: &Connection, id: i64, input: &UpdateEventInput) -> Sq
 }
 
 fn close_event_impl(conn: &Connection, id: i64) -> SqlResult<Event> {
+    // Mark closed and stamp the operational-period end if it wasn't already set.
     conn.execute(
-        "UPDATE events SET to_date=?1, to_time=?2 WHERE id=?3",
+        "UPDATE events
+         SET closed = 1,
+             to_date = COALESCE(to_date, ?1),
+             to_time = COALESCE(to_time, ?2)
+         WHERE id = ?3",
         params![now_date(), now_time(), id],
     )?;
     fetch_event(conn, id)
 }
 
 fn reopen_event_impl(conn: &Connection, id: i64) -> SqlResult<Event> {
+    // Reopen: clear the closed flag and the operational-period end so logging resumes.
     conn.execute(
-        "UPDATE events SET to_date=NULL, to_time=NULL WHERE id=?1",
+        "UPDATE events SET closed = 0, to_date = NULL, to_time = NULL WHERE id = ?1",
         params![id],
     )?;
     fetch_event(conn, id)
@@ -533,16 +541,25 @@ mod tests {
         let conn = db();
         let ev = sample_event(&conn);
         let closed = close_event_impl(&conn, ev.id).unwrap();
+        assert!(closed.closed);
         assert!(closed.to_date.as_deref().unwrap_or("").len() >= 8);
         assert!(closed.to_time.as_deref().unwrap_or("").len() >= 3);
     }
 
     #[test]
-    fn reopen_event_clears_stop_datetime() {
+    fn new_event_is_open() {
+        let conn = db();
+        let ev = sample_event(&conn);
+        assert!(!ev.closed);
+    }
+
+    #[test]
+    fn reopen_event_clears_closed_and_stop_datetime() {
         let conn = db();
         let ev = sample_event(&conn);
         close_event_impl(&conn, ev.id).unwrap();
         let reopened = reopen_event_impl(&conn, ev.id).unwrap();
+        assert!(!reopened.closed);
         assert!(reopened.to_date.is_none());
         assert!(reopened.to_time.is_none());
     }
