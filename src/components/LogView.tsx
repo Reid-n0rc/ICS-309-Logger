@@ -70,6 +70,15 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
     }
   };
 
+  const handleReopenIncident = async () => {
+    try {
+      const updated = await invoke<Event>("reopen_event", { id: event.id });
+      onEventUpdate(updated);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // On any export, if the ending operational period isn't set yet, stamp it to the
   // current date/time (persisted) so the output always has an end time. Returns the
   // event to use for the export.
@@ -245,8 +254,14 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       {/* Entry form (fixed top) */}
       {!event.to_date && <EntryForm eventId={event.id} onEntryAdded={handleEntryAdded} />}
       {event.to_date && (
-        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800 flex-shrink-0">
-          This incident is closed. Log entries are read-only.
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800 flex items-center justify-between flex-shrink-0">
+          <span>This incident is closed. Log entries are read-only.</span>
+          <button
+            onClick={handleReopenIncident}
+            className="px-3 py-1 text-xs bg-yellow-600 text-white rounded font-semibold hover:bg-yellow-700 transition-colors"
+          >
+            Reopen Incident
+          </button>
         </div>
       )}
 
