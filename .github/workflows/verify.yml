@@ -128,3 +128,45 @@ jobs:
           }
           Stop-Process -Id $p.Id -Force
           Write-Host "Windows smoke test passed: app ran and created its database."
+
+  # Runtime probe: drives the built web UI in headless Chromium and exercises every
+  # export (PDF/Excel/FLdigi), failing on any uncaught JS error. Guards against
+  # missing browser globals (e.g. Buffer/process) regressing the export libraries.
+  web-runtime:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Install Puppeteer (with bundled Chromium)
+        run: npm install --no-save puppeteer@25
+
+      - name: Install Chromium runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+            libgbm1 libpango-1.0-0 libcairo2 libasound2
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 4173 &
+          for i in $(seq 1 40); do
+            curl -sf -o /dev/null http://localhost:4173 && break
+            sleep 0.5
+          done
+
+      - name: Export runtime probe
+        run: node scripts/export-probe.mjs

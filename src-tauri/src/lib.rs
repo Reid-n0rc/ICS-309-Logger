@@ -36,7 +36,6 @@ pub fn run() {
             commands::generate_fldigi_export,
             commands::get_db_path_str,
             commands::write_file,
-            commands::read_file,
             commands::save_file_dialog,
         ])
         .run(tauri::generate_context!())
