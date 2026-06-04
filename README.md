@@ -277,16 +277,23 @@ bundles under `src-tauri/target/release/bundle/`).
 
 ### CI/CD (GitHub Actions)
 
-Three workflows drive continuous integration and delivery. All builds target
+Four workflows drive continuous integration and delivery. Builds target
 **macOS (Apple Silicon + Intel), Linux, and Windows** via
 [`tauri-action`](https://github.com/tauri-apps/tauri-action).
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| [`ci.yml`](.github/workflows/ci.yml) | Every push & PR (all branches) | Type-check, frontend build, and `cargo check` — fast feedback on every commit. |
+| [`verify.yml`](.github/workflows/verify.yml) | Every push & PR (all branches) | On **macOS, Linux, and Windows**: type-check, build the frontend, run the backend **feature tests** (`cargo test`), and **smoke-launch the built app** to confirm it starts and initializes its database on each OS. |
 | [`nightly.yml`](.github/workflows/nightly.yml) | Every push to `main` | Builds all platforms and publishes them to a single rolling **`nightly`** pre-release, recreated each run so it always tracks the latest commit. |
 | [`release.yml`](.github/workflows/release.yml) | Push of a `v*` tag (or manual dispatch) | Builds all platforms and creates a **stable, versioned** GitHub Release (as a draft to review before publishing). |
 | [`screenshots.yml`](.github/workflows/screenshots.yml) | Push to `main` touching GUI source | Regenerates the README screenshots from the built UI and commits any changes back (auto-commit carries `[skip ci]`, so it doesn't trigger rebuilds). |
+
+**Cross-OS verification.** Every feature (event lifecycle, log entries, per-call-sign
+auto message numbering, FLdigi export) is covered by Rust integration tests that run on
+all three operating systems, and the actual app binary is launched on each OS to confirm
+it runs. Full click-through UI automation isn't included because `tauri-driver` does not
+support macOS (WKWebView has no WebDriver); the feature tests plus the per-OS launch and
+multi-OS release builds provide the cross-platform guarantee instead.
 
 **Continuous builds:** every commit to `main` produces downloadable installers on the
 [Releases page](https://github.com/Reid-n0rc/ICS-309-Logger/releases) under the
@@ -306,11 +313,11 @@ Three workflows drive continuous integration and delivery. All builds target
 > No signing certificates are configured, so the macOS/Windows bundles are unsigned —
 > users may need to bypass Gatekeeper/SmartScreen on first launch.
 
-### Type-check / compile checks
+### Type-check / tests
 
 ```bash
 npx tsc --noEmit                       # TypeScript
-cd src-tauri && cargo check            # Rust
+cd src-tauri && cargo test             # Rust backend feature tests
 ```
 
 ### Regenerating screenshots
