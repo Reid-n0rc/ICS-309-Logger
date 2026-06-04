@@ -136,3 +136,42 @@ jobs:
                 'content-length': data.length,
               },
             });
+
+  # Build the Android APK and attach it to the same tagged release.
+  android:
+    needs: release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build & verify Android APK
+        id: build
+        uses: ./.github/actions/android-build
+        with:
+          version: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+
+      - name: Attach APK to release
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const wantTag = '${{ github.ref_type == 'tag' && github.ref_name || '' }}';
+            const releases = await github.paginate(github.rest.repos.listReleases, { owner, repo, per_page: 100 });
+            let rel = wantTag ? releases.find(r => r.tag_name === wantTag) : null;
+            if (!rel) rel = releases.find(r => r.draft);   // dispatch fallback: newest draft
+            if (!rel) throw new Error('No release found to attach the APK to');
+            const data = fs.readFileSync('${{ steps.build.outputs.apk-path }}');
+            const version = (rel.tag_name || 'app').replace(/^v/, '');
+            await github.rest.repos.uploadReleaseAsset({
+              owner, repo,
+              release_id: rel.id,
+              name: `ICS-309-Logger_${version}_android.apk`,
+              data,
+              headers: {
+                'content-type': 'application/vnd.android.package-archive',
+                'content-length': data.length,
+              },
+            });
