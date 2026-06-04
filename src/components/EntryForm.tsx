@@ -60,15 +60,29 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
     [eventId]
   );
 
-  // From Callsign: Enter → auto-populate From Msg#, move to To Callsign
-  const handleFromCsKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
+  // Auto-populate the From/To Msg# from the call sign. Runs on blur so it fires no
+  // matter how focus leaves the field — desktop Enter, Tab, a tap, or the Android
+  // soft-keyboard "Next" action all trigger it.
+  const populateFromNum = useCallback(async () => {
+    if (fromCs.trim() && !fromNumManual.current) {
+      const next = await fetchNextNum(fromCs, "from");
+      setFromNum(next);
+      fromNumManual.current = false;
+    }
+  }, [fromCs, fetchNextNum]);
+
+  const populateToNum = useCallback(async () => {
+    if (toCs.trim() && !toNumManual.current) {
+      const next = await fetchNextNum(toCs, "to");
+      setToNum(next);
+      toNumManual.current = false;
+    }
+  }, [toCs, fetchNextNum]);
+
+  // From Callsign: Enter → move to To Callsign (blur auto-populates From Msg#)
+  const handleFromCsKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (fromCs.trim() && !fromNumManual.current) {
-        const next = await fetchNextNum(fromCs, "from");
-        setFromNum(next);
-        fromNumManual.current = false;
-      }
       toCsRef.current?.focus();
     }
   };
@@ -86,15 +100,10 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
     }
   };
 
-  // To Callsign: Enter → auto-populate To Msg#, move to Message
-  const handleToCsKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
+  // To Callsign: Enter → move to Message (blur auto-populates To Msg#)
+  const handleToCsKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (toCs.trim() && !toNumManual.current) {
-        const next = await fetchNextNum(toCs, "to");
-        setToNum(next);
-        toNumManual.current = false;
-      }
       messageRef.current?.focus();
     }
   };
@@ -161,6 +170,8 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
                 fromCsRef.current?.focus();
               }
             }}
+            enterKeyHint="next"
+            inputMode="numeric"
             placeholder="HHMM"
             maxLength={4}
             className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:border-blue-500 focus:outline-none"
@@ -183,6 +194,8 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
                 setFromNum("");
               }}
               onKeyDown={handleFromCsKeyDown}
+              onBlur={populateFromNum}
+              enterKeyHint="next"
               className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono uppercase focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -194,6 +207,8 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
               value={fromNum}
               onChange={(e) => handleFromNumChange(e.target.value)}
               onKeyDown={handleFromNumKeyDown}
+              tabIndex={-1}
+              inputMode="numeric"
               className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono text-center focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -213,6 +228,8 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
                 setToNum("");
               }}
               onKeyDown={handleToCsKeyDown}
+              onBlur={populateToNum}
+              enterKeyHint="next"
               className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono uppercase focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -224,6 +241,8 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
               value={toNum}
               onChange={(e) => handleToNumChange(e.target.value)}
               onKeyDown={handleToNumKeyDown}
+              tabIndex={-1}
+              inputMode="numeric"
               className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono text-center focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -239,6 +258,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleMessageKeyDown}
+            enterKeyHint="send"
             rows={2}
             spellCheck
             className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm resize-none focus:border-blue-500 focus:outline-none"
