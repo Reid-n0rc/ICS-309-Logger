@@ -28,11 +28,17 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
-            // Delete the existing nightly release (if any) and its tag.
-            try {
-              const existing = await github.rest.repos.getReleaseByTag({ owner, repo, tag: 'nightly' });
-              await github.rest.repos.deleteRelease({ owner, repo, release_id: existing.data.id });
-            } catch (e) { /* no existing release */ }
+            // Delete ALL existing "nightly" releases (including leftover drafts, which
+            // have no real git tag and so can't be found via getReleaseByTag).
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner, repo, per_page: 100,
+            });
+            for (const r of releases) {
+              if (r.tag_name === 'nightly') {
+                await github.rest.repos.deleteRelease({ owner, repo, release_id: r.id });
+              }
+            }
+            // Delete the nightly git tag if it was ever materialized by a published run.
             try {
               await github.rest.git.deleteRef({ owner, repo, ref: 'tags/nightly' });
             } catch (e) { /* no existing tag */ }
