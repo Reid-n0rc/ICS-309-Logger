@@ -4,6 +4,7 @@ import { Event, LogEntry, UpdateEventInput } from "../types";
 import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
+import SignatureModal from "./SignatureModal";
 import { exportIcs309Pdf } from "../lib/exportPdf";
 import { exportIcs309Excel } from "../lib/exportExcel";
 import { saveBytesWithDialog } from "../lib/saveFile";
@@ -26,6 +27,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [showEventEdit, setShowEventEdit] = useState(false);
+  const [showSignature, setShowSignature] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
 
   // Resizable split
@@ -159,6 +161,12 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             Export PDF
           </button>
           <button
+            onClick={() => setShowSignature(true)}
+            className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+          >
+            Sign &amp; Export
+          </button>
+          <button
             onClick={handleExportExcel}
             className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
           >
@@ -276,6 +284,11 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
           }}
           onClose={() => setShowEventEdit(false)}
         />
+      )}
+
+      {/* Sign & export modal */}
+      {showSignature && (
+        <SignatureModal event={event} entries={entries} onClose={() => setShowSignature(false)} />
       )}
     </div>
   );

@@ -117,10 +117,15 @@ See [Logging workflow](#logging-workflow) below for the full field-by-field flow
 - **Resizable, scrollable log table** — drag the divider to resize; double-click any
   row to edit or delete it.
 - **Export & print** (each export prompts for a save location)
-  - **PDF** — a formatted ICS-309 matching the official layout.
+  - **PDF** — a formatted ICS-309 matching the official layout, with fillable blank
+    cells and a signature field.
   - **Excel** — an `.xlsx` workbook laid out like the ICS-309 form.
   - **FLdigi** — an `.flmsg`-style file for use with [FLdigi](http://www.w1hkj.com/).
   - **Print** — sends a formatted ICS-309 to the printer.
+- **Digital signatures** (Sign & Export) — sign the PDF two ways, separately or together:
+  - **Draw or type** a visible signature, placed in the signature box on every page.
+  - **Certificate (.p12/.pfx)** — embed a cryptographic PKCS#7 digital signature,
+    verifiable in a PDF reader (e.g. Acrobat shows “Signed and all signatures are valid”).
 - **Open / close incidents** — closing an incident records the *To* (stop) date/time
   and returns to the startup screen. All dates/times can be edited manually.
 - **Lightweight local storage** — a single SQLite database file (`ics309_data.db`).
