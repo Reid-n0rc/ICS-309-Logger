@@ -26,6 +26,7 @@ pub fn run() {
             commands::generate_fldigi_export,
             commands::get_db_path_str,
             commands::write_file,
+            commands::read_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

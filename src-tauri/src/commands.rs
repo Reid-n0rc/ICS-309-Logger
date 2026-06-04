@@ -425,6 +425,13 @@ pub fn write_file(path: String, contents: Vec<u8>) -> CmdResult<()> {
     std::fs::write(&path, &contents).map_err(e)
 }
 
+/// Read raw bytes from an absolute path chosen by the user via an open dialog.
+/// Used to load a signing certificate (.p12/.pfx) for digital signatures.
+#[tauri::command]
+pub fn read_file(path: String) -> CmdResult<Vec<u8>> {
+    std::fs::read(&path).map_err(e)
+}
+
 // ── Tests: exercise every feature against an in-memory DB (runs on each OS) ──────
 
 #[cfg(test)]
