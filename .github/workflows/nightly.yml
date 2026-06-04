@@ -187,9 +187,41 @@ jobs:
               },
             });
 
+  # 2b. Build the Android APK and attach it to the same nightly release.
+  android:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build & verify Android APK
+        id: build
+        uses: ./.github/actions/android-build
+        with:
+          version: ${{ needs.create-release.outputs.nightly_version }}
+
+      - name: Attach APK to nightly release
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const src = '${{ steps.build.outputs.apk-path }}';
+            const data = fs.readFileSync(src);
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.outputs.release_id }},
+              name: 'ICS-309-Logger_${{ needs.create-release.outputs.nightly_version }}_android.apk',
+              data,
+              headers: {
+                'content-type': 'application/vnd.android.package-archive',
+                'content-length': data.length,
+              },
+            });
+
   # 3. Publish the draft release (flip draft -> published).
   publish-release:
-    needs: [create-release, build-tauri]
+    needs: [create-release, build-tauri, android]
     runs-on: ubuntu-latest
     steps:
       - name: Publish nightly release
