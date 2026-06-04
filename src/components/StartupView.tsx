@@ -23,7 +23,7 @@ export default function StartupView({ onOpenEvent }: Props) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full overflow-y-auto bg-gray-100 px-4 py-8">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -37,7 +37,7 @@ export default function StartupView({ onOpenEvent }: Props) {
 
         {subView === "home" && (
           <div className="bg-white rounded-lg shadow-md p-8">
-            <div className="flex gap-4 justify-center mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <button
                 onClick={() => setSubView("new")}
                 className="px-8 py-3 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition-colors"

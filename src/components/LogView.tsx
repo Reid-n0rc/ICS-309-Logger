@@ -152,12 +152,12 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       {/* Header bar */}
-      <div className="bg-gray-800 text-white px-4 py-2 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <div>
+      <div className="bg-gray-800 text-white px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="min-w-0">
             <span className="font-bold text-sm">{event.incident_name}</span>
-            <span className="text-gray-400 text-xs ml-3">{event.radio_network_name}</span>
-            <span className="text-gray-400 text-xs ml-2">· {event.radio_operator}</span>
+            <span className="text-gray-400 text-xs ml-3 hidden sm:inline">{event.radio_network_name}</span>
+            <span className="text-gray-400 text-xs ml-2 hidden md:inline">· {event.radio_operator}</span>
           </div>
           {event.to_date && (
             <span className="px-2 py-0.5 bg-red-600 text-white text-xs rounded font-semibold">
@@ -167,7 +167,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
         </div>
 
         {/* Menu */}
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <button
             onClick={handleExportPdf}
             className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
@@ -233,7 +233,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       </div>
 
       {/* Op period bar */}
-      <div className="bg-gray-700 text-gray-300 text-xs px-4 py-1 flex gap-6 flex-shrink-0">
+      <div className="bg-gray-700 text-gray-300 text-xs px-4 py-1 flex flex-wrap gap-x-6 gap-y-1 flex-shrink-0">
         <span>
           Op Period From:{" "}
           <span className="text-white font-mono">
@@ -346,7 +346,7 @@ function EventEditModal({ event, onSaved, onClose }: EventEditProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-800">Edit Event Details</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
@@ -357,7 +357,7 @@ function EventEditModal({ event, onSaved, onClose }: EventEditProps) {
           <Field label="Radio Network Name" value={radioNetwork} onChange={setRadioNetwork} />
           <Field label="Radio Operator" value={radioOperator} onChange={setRadioOperator} />
 
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
               <input type="text" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
