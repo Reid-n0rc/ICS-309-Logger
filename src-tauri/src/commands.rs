@@ -143,6 +143,14 @@ fn close_event_impl(conn: &Connection, id: i64) -> SqlResult<Event> {
     fetch_event(conn, id)
 }
 
+fn reopen_event_impl(conn: &Connection, id: i64) -> SqlResult<Event> {
+    conn.execute(
+        "UPDATE events SET to_date=NULL, to_time=NULL WHERE id=?1",
+        params![id],
+    )?;
+    fetch_event(conn, id)
+}
+
 fn create_log_entry_impl(conn: &Connection, input: &CreateLogEntryInput) -> SqlResult<LogEntry> {
     conn.execute(
         "INSERT INTO log_entries
@@ -369,6 +377,12 @@ pub fn close_event(state: State<DbState>, id: i64) -> CmdResult<Event> {
 }
 
 #[tauri::command]
+pub fn reopen_event(state: State<DbState>, id: i64) -> CmdResult<Event> {
+    let conn = state.0.lock().map_err(e)?;
+    reopen_event_impl(&conn, id).map_err(e)
+}
+
+#[tauri::command]
 pub fn create_log_entry(state: State<DbState>, input: CreateLogEntryInput) -> CmdResult<LogEntry> {
     let conn = state.0.lock().map_err(e)?;
     create_log_entry_impl(&conn, &input).map_err(e)
@@ -521,6 +535,16 @@ mod tests {
         let closed = close_event_impl(&conn, ev.id).unwrap();
         assert!(closed.to_date.as_deref().unwrap_or("").len() >= 8);
         assert!(closed.to_time.as_deref().unwrap_or("").len() >= 3);
+    }
+
+    #[test]
+    fn reopen_event_clears_stop_datetime() {
+        let conn = db();
+        let ev = sample_event(&conn);
+        close_event_impl(&conn, ev.id).unwrap();
+        let reopened = reopen_event_impl(&conn, ev.id).unwrap();
+        assert!(reopened.to_date.is_none());
+        assert!(reopened.to_time.is_none());
     }
 
     #[test]

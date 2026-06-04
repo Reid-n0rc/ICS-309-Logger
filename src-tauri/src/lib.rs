@@ -18,6 +18,7 @@ pub fn run() {
             commands::get_event,
             commands::update_event,
             commands::close_event,
+            commands::reopen_event,
             commands::create_log_entry,
             commands::get_log_entries,
             commands::update_log_entry,
