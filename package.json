@@ -2,6 +2,8 @@
   "name": "ics-309-logger",
   "private": true,
   "version": "0.1.0",
+  "license": "MIT",
+  "author": "Reid Crowe",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -2,6 +2,8 @@
 name = "ics-309-logger"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+authors = ["Reid Crowe"]
 
 [lib]
 name = "ics_309_logger_lib"
