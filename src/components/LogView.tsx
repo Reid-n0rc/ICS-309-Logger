@@ -5,6 +5,7 @@ import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
 import { exportIcs309Pdf } from "../lib/exportPdf";
+import { exportIcs309Excel } from "../lib/exportExcel";
 import { saveBytesWithDialog } from "../lib/saveFile";
 
 interface Props {
@@ -90,6 +91,14 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
     printWindow.print();
   };
 
+  const handleExportExcel = async () => {
+    try {
+      await exportIcs309Excel(event, entries);
+    } catch (err) {
+      console.error("Excel export failed:", err);
+    }
+  };
+
   const handleExportFldigi = async () => {
     try {
       const content = await invoke<string>("generate_fldigi_export", { eventId: event.id });
@@ -148,6 +157,12 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
           >
             Export PDF
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+          >
+            Export Excel
           </button>
           <button
             onClick={handleExportFldigi}

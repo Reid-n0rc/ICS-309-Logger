@@ -92,7 +92,7 @@ npm run tauri dev      # launch the app
 3. **Fix something.** Double-click any row to edit its fields or delete it. Drag the
    divider above the table to resize the log area.
 
-4. **Export or print.** Use the menu bar: **Export PDF**, **Export FLdigi**, or
+4. **Export or print.** Use the menu bar: **Export PDF**, **Export Excel**, **Export FLdigi**, or
    **Print** to produce a formatted ICS-309.
 
 5. **Close out.** Click **Close Incident** to record the stop time and return to the
@@ -114,8 +114,9 @@ See [Logging workflow](#logging-workflow) below for the full field-by-field flow
   processor or web form.
 - **Resizable, scrollable log table** — drag the divider to resize; double-click any
   row to edit or delete it.
-- **Export & print**
+- **Export & print** (each export prompts for a save location)
   - **PDF** — a formatted ICS-309 matching the official layout.
+  - **Excel** — an `.xlsx` workbook laid out like the ICS-309 form.
   - **FLdigi** — an `.flmsg`-style file for use with [FLdigi](http://www.w1hkj.com/).
   - **Print** — sends a formatted ICS-309 to the printer.
 - **Open / close incidents** — closing an incident records the *To* (stop) date/time
@@ -141,7 +142,7 @@ to advance; pressing `Enter` on the last field creates the event and records the
 
 ### Communications log
 The main logging screen. The entry form sits at the top, with a running table of
-previous entries below. The menu bar provides Export PDF, Export FLdigi, Print,
+previous entries below. The menu bar provides Export PDF, Export Excel, Export FLdigi, Print,
 Edit Event, and Close Incident.
 
 ![Communications log](docs/screenshots/03-log-view.png)
