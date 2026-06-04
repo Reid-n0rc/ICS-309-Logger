@@ -6,3 +6,6 @@ dist-ssr
 .env.*
 src-tauri/target
 src-tauri/gen/schemas
+
+# Pages: screenshots are copied in at deploy time
+site/screenshots
