@@ -338,4 +338,8 @@ node scripts/screenshot.mjs
 
 ## License
 
-See repository for license details.
+Licensed under the [MIT License](LICENSE) — © 2026 Reid Crowe.
+
+You may freely use, modify, and distribute this software, including for commercial
+purposes. The only condition is **attribution**: the copyright notice and the MIT
+license text must be retained in copies or substantial portions of the software.
