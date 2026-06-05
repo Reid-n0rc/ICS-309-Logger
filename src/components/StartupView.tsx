@@ -4,6 +4,7 @@ import { Event } from "../types";
 import NewEventForm from "./NewEventForm";
 import EventList from "./EventList";
 import ThemeToggle from "./ThemeToggle";
+import FileMenu from "./FileMenu";
 
 interface Props {
   onOpenEvent: (event: Event) => void;
@@ -25,6 +26,9 @@ export default function StartupView({ onOpenEvent }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full overflow-y-auto bg-gray-100 dark:bg-gray-900 px-4 py-8">
+      <div className="fixed top-3 left-3 z-50">
+        <FileMenu buttonClassName="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-50 dark:hover:bg-gray-700" />
+      </div>
       <ThemeToggle className="fixed top-3 right-3 z-50 w-9 h-9 border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" />
       <div className="w-full max-w-2xl">
         {/* Header */}
