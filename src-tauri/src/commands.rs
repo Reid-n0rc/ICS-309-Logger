@@ -308,48 +308,67 @@ fn fldigi_export_impl(conn: &Connection, event_id: i64) -> SqlResult<String> {
         })?
         .collect::<SqlResult<Vec<_>>>()?;
 
-    let from_period = format!(
-        "{} {}",
-        event.from_date.as_deref().unwrap_or(""),
-        event.from_time.as_deref().unwrap_or("")
-    );
-    let to_period = format!(
-        "{} {}",
-        event.to_date.as_deref().unwrap_or(""),
-        event.to_time.as_deref().unwrap_or("")
-    );
-    let prepared_dt = Local::now().format("%Y-%m-%d %H%M").to_string();
+    let now = Local::now();
+    let callsign = callsign_of(&event.radio_operator);
+    // flmsg header-editor metadata: a leading newline, the station call sign, and a
+    // YYYYMMDDHHMMSS serial (matches flmsg's :hdr_ed: field).
+    let hdr = format!("\n{} {}", callsign, now.format("%Y%m%d%H%M%S"));
+    let dtm = format!("{}, {}L", now.format("%Y-%m-%d"), now.format("%H%M"));
 
     let mut out = String::new();
-    out.push_str("<flmsg>4.0\n");
-    out.push_str("<mo>M\n");
-    out.push_str(&format!("<dt>{}\n", Local::now().format("%Y-%m-%d")));
-    out.push_str(&format!("<tm>{}\n", Local::now().format("%H%M")));
-    out.push_str("<fn>ics309\n");
-    out.push_str("<ver>1.0.0.0\n");
-    out.push_str(&format!("<1>{}\n", event.incident_name));
-    out.push_str(&format!("<2>{}\n", from_period.trim()));
-    out.push_str(&format!("<3>{}\n", to_period.trim()));
-    out.push_str(&format!("<4>{}\n", event.radio_network_name));
-    out.push_str(&format!("<5>{}\n", event.radio_operator));
-    out.push_str("<log>\n");
-    for (time, from_cs, from_num, to_cs, to_num, msg) in &entries {
-        let row = format!(
-            "{}|{}|{}|{}|{}|{}\n",
-            time.as_deref().unwrap_or(""),
-            from_cs.as_deref().unwrap_or(""),
-            from_num.as_deref().unwrap_or(""),
-            to_cs.as_deref().unwrap_or(""),
-            to_num.as_deref().unwrap_or(""),
-            msg.as_deref().unwrap_or("").replace('\n', " "),
-        );
-        out.push_str(&row);
+    out.push_str("<flmsg>4.0.24\n");
+    field(&mut out, "hdr_ed", &hdr);
+    out.push_str("<ics309>\n");
+    field(&mut out, "inc", &event.incident_name);
+    field(&mut out, "dfm", event.from_date.as_deref().unwrap_or(""));
+    field(&mut out, "tfm", &fmt_time(event.from_time.as_deref()));
+    field(&mut out, "dto", event.to_date.as_deref().unwrap_or(""));
+    field(&mut out, "tto", &fmt_time(event.to_time.as_deref()));
+    field(&mut out, "pre", &event.radio_operator);
+    field(&mut out, "dtm", &dtm);
+    field(&mut out, "net", &event.radio_network_name);
+    field(&mut out, "opr", &event.radio_operator);
+    for (i, (time, from_cs, from_num, to_cs, to_num, msg)) in entries.iter().enumerate() {
+        field(&mut out, &format!("tm[{i}]"), &fmt_time(time.as_deref()));
+        field(&mut out, &format!("to[{i}]"), &combine(to_cs.as_deref(), to_num.as_deref()));
+        field(&mut out, &format!("fm[{i}]"), &combine(from_cs.as_deref(), from_num.as_deref()));
+        field(&mut out, &format!("msg[{i}]"), msg.as_deref().unwrap_or(""));
     }
-    out.push_str("</log>\n");
-    out.push_str(&format!("<6>{}\n", event.radio_operator));
-    out.push_str(&format!("<7>{}\n", prepared_dt));
-
     Ok(out)
+}
+
+/// One flmsg field record: `:name:<byte-len> <value>` followed by a newline.
+fn field(out: &mut String, name: &str, value: &str) {
+    out.push_str(&format!(":{}:{} {}\n", name, value.len(), value));
+}
+
+/// Combine a call sign and message number into one flmsg from/to field,
+/// separated by a space (either part may be empty).
+fn combine(cs: Option<&str>, num: Option<&str>) -> String {
+    let cs = cs.unwrap_or("").trim();
+    let num = num.unwrap_or("").trim();
+    match (cs.is_empty(), num.is_empty()) {
+        (false, false) => format!("{cs} {num}"),
+        (false, true) => cs.to_string(),
+        (true, false) => num.to_string(),
+        (true, true) => String::new(),
+    }
+}
+
+/// flmsg local-time convention: an `L` suffix on the HHMM value (empty stays empty).
+fn fmt_time(t: Option<&str>) -> String {
+    match t.map(str::trim).filter(|s| !s.is_empty()) {
+        Some(s) => format!("{s}L"),
+        None => String::new(),
+    }
+}
+
+/// The operator's call sign — the part after the last comma in "Name, CALL",
+/// lower-cased the way flmsg names its files.
+fn callsign_of(operator: &str) -> String {
+    let cs = operator.rsplit(',').next().unwrap_or(operator).trim();
+    let cs = if cs.is_empty() { operator.trim() } else { cs };
+    cs.to_lowercase()
 }
 
 // ── Tauri command wrappers ──────────────────────────────────────────────────────
@@ -488,6 +507,91 @@ pub async fn save_file_dialog(
         let _ = (app, name, mime, contents);
         Err("save_file_dialog is only available on Android".to_string())
     }
+}
+
+// ── FLdigi auto-send (via FLdigi's XML-RPC socket) ───────────────────────────────
+
+/// CRC-16/MODBUS (init 0xFFFF, reflected poly 0xA001), upper-hex — byte-compatible
+/// with flmsg's `Ccrc16` so a receiving flmsg accepts the transmitted message.
+fn crc16_modbus(s: &str) -> String {
+    let mut crc: u16 = 0xFFFF;
+    for &b in s.as_bytes() {
+        crc ^= b as u16;
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 { (crc >> 1) ^ 0xA001 } else { crc >> 1 };
+        }
+    }
+    format!("{crc:04X}")
+}
+
+/// Wrap flmsg content in the transfer envelope flmsg transmits (see flmsg
+/// src/utils/wrap.cxx): `[WRAP:beg][WRAP:lf][WRAP:fn name]<content>[WRAP:chksum CRC][WRAP:end]`,
+/// where the CRC covers the `[WRAP:fn ...]` tag plus the content.
+fn wrap_flmsg(content: &str, filename: &str) -> String {
+    let inner = format!("[WRAP:fn {filename}]{content}");
+    let crc = crc16_modbus(&inner);
+    format!("[WRAP:beg][WRAP:lf]{inner}[WRAP:chksum {crc}][WRAP:end]")
+}
+
+fn xml_escape(s: &str) -> String {
+    s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;")
+}
+
+/// One XML-RPC call to FLdigi over its socket service (HTTP POST to /RPC2).
+fn fldigi_rpc(host: &str, port: u16, method: &str, args: &[&str]) -> CmdResult<String> {
+    use std::io::{Read, Write};
+    use std::net::{TcpStream, ToSocketAddrs};
+    use std::time::Duration;
+
+    let params: String = args
+        .iter()
+        .map(|a| format!("<param><value><string>{}</string></value></param>", xml_escape(a)))
+        .collect();
+    let body = format!(
+        "<?xml version=\"1.0\"?><methodCall><methodName>{method}</methodName><params>{params}</params></methodCall>"
+    );
+    let req = format!(
+        "POST /RPC2 HTTP/1.1\r\nHost: {host}:{port}\r\nContent-Type: text/xml\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+        body.len()
+    );
+
+    let addr = format!("{host}:{port}")
+        .to_socket_addrs()
+        .map_err(|err| format!("Bad FLdigi address {host}:{port}: {err}"))?
+        .next()
+        .ok_or_else(|| format!("Could not resolve FLdigi address {host}:{port}"))?;
+    let mut stream = TcpStream::connect_timeout(&addr, Duration::from_secs(4)).map_err(|err| {
+        format!("Cannot reach FLdigi at {host}:{port} ({err}). Is FLdigi running with its XML-RPC server enabled?")
+    })?;
+    stream.set_read_timeout(Some(Duration::from_secs(6))).ok();
+    stream.set_write_timeout(Some(Duration::from_secs(6))).ok();
+    stream.write_all(req.as_bytes()).map_err(e)?;
+    let mut resp = String::new();
+    stream.read_to_string(&mut resp).map_err(e)?;
+    if resp.contains("<fault>") {
+        return Err(format!("FLdigi returned a fault for {method}: {resp}"));
+    }
+    Ok(resp)
+}
+
+/// Send an flmsg ICS-309 to FLdigi for transmission via its XML-RPC socket — the
+/// same mechanism flmsg's auto-send uses. Wraps the content in the flmsg transfer
+/// envelope, loads it into FLdigi's TX buffer, and keys the transmitter (the `^r`
+/// macro returns FLdigi to receive once the buffer is sent).
+#[tauri::command]
+pub fn fldigi_send(
+    content: String,
+    filename: String,
+    host: Option<String>,
+    port: Option<u16>,
+) -> CmdResult<()> {
+    let host = host.unwrap_or_else(|| "127.0.0.1".to_string());
+    let port = port.unwrap_or(7362);
+    let wrapped = wrap_flmsg(&content, &filename);
+    fldigi_rpc(&host, port, "text.clear_tx", &[])?;
+    fldigi_rpc(&host, port, "text.add_tx", &[&format!("{wrapped}\n^r\n")])?;
+    fldigi_rpc(&host, port, "main.tx", &[])?;
+    Ok(())
 }
 
 // ── Tests: exercise every feature against an in-memory DB (runs on each OS) ──────
@@ -731,13 +835,33 @@ mod tests {
         .unwrap();
 
         let out = fldigi_export_impl(&conn, ev.id).unwrap();
+        // flmsg .309 format: header, ics309 marker, and length-prefixed fields.
         assert!(out.starts_with("<flmsg>"));
-        assert!(out.contains("<fn>ics309"));
-        assert!(out.contains("<1>Test Incident"));
-        assert!(out.contains("<4>Test Net"));
-        assert!(out.contains("<log>"));
-        assert!(out.contains("</log>"));
-        // The log row is pipe-delimited and newlines in messages are flattened.
-        assert!(out.contains("1201|W1AAA|1|NET|1|multi line"));
+        assert!(out.contains("<ics309>\n"));
+        assert!(out.contains(":inc:13 Test Incident\n")); // len("Test Incident") == 13
+        assert!(out.contains(":net:8 Test Net\n")); // len("Test Net") == 8
+        // Call sign and message # are combined with a space.
+        assert!(out.contains(":fm[0]:7 W1AAA 1\n")); // "W1AAA 1"
+        assert!(out.contains(":to[0]:5 NET 1\n")); // "NET 1"
+        // Times carry the flmsg local-time "L" suffix.
+        assert!(out.contains(":tm[0]:5 1201L\n"));
+        // Message newlines are preserved (length-prefixed), not flattened.
+        assert!(out.contains(":msg[0]:10 multi\nline\n"));
+    }
+
+    #[test]
+    fn crc16_matches_flmsg_modbus_check_value() {
+        // CRC-16/MODBUS check value for "123456789" is 0x4B37.
+        assert_eq!(crc16_modbus("123456789"), "4B37");
+    }
+
+    #[test]
+    fn wrap_envelope_is_flmsg_compatible() {
+        let w = wrap_flmsg("BODY", "test.309");
+        assert!(w.starts_with("[WRAP:beg][WRAP:lf][WRAP:fn test.309]BODY[WRAP:chksum "));
+        assert!(w.ends_with("][WRAP:end]"));
+        // Checksum covers the fn tag plus the content.
+        let crc = crc16_modbus("[WRAP:fn test.309]BODY");
+        assert!(w.contains(&format!("[WRAP:chksum {crc}]")));
     }
 }

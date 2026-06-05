@@ -5,6 +5,7 @@ import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
 import ThemeToggle from "./ThemeToggle";
+import { ask, message } from "@tauri-apps/plugin-dialog";
 import { exportIcs309Pdf } from "../lib/exportPdf";
 import { exportIcs309Excel } from "../lib/exportExcel";
 import { saveBytesWithDialog } from "../lib/saveFile";
@@ -22,6 +23,20 @@ function nowDate() {
 function nowTime() {
   const now = new Date();
   return String(now.getHours()).padStart(2, "0") + String(now.getMinutes()).padStart(2, "0");
+}
+
+// flmsg-style filename: <callsign>-<YYYYMMDD>-<HHMMSS>L-1.309
+function fldigiFilename(ev: Event): string {
+  const callsign =
+    (ev.radio_operator.split(",").pop() || ev.radio_operator)
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "") || "station";
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  const date = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+  const time = `${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  return `${callsign}-${date}-${time}L-1.309`;
 }
 
 export default function LogView({ event, onEventUpdate, onClose }: Props) {
@@ -131,13 +146,40 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
     }
   };
 
+  const saveFldigiFile = async (filename: string, content: string) => {
+    const bytes = new TextEncoder().encode(content);
+    await saveBytesWithDialog(filename, [{ name: "flmsg ICS-309", extensions: ["309"] }], bytes);
+  };
+
   const handleExportFldigi = async () => {
     try {
       const ev = await ensureEndPeriod();
       const content = await invoke<string>("generate_fldigi_export", { eventId: ev.id });
-      const filename = `ICS309-${ev.incident_name.replace(/\s+/g, "_")}.flmsg`;
-      const bytes = new TextEncoder().encode(content);
-      await saveBytesWithDialog(filename, [{ name: "FLdigi Message", extensions: ["flmsg"] }], bytes);
+      const filename = fldigiFilename(ev);
+
+      // Offer to auto-send over FLdigi's socket (like flmsg), else save the .309 file.
+      const send = await ask(
+        "Send this ICS-309 to FLdigi for transmission now?\n\n" +
+          "Yes — transmit via FLdigi's XML-RPC socket (127.0.0.1:7362).\n" +
+          "No — save the .309 file instead.",
+        { title: "Export FLdigi", kind: "info" }
+      );
+
+      if (!send) {
+        await saveFldigiFile(filename, content);
+        return;
+      }
+
+      try {
+        await invoke("fldigi_send", { content, filename });
+        await message("Loaded into FLdigi and transmitting.", { title: "FLdigi", kind: "info" });
+      } catch (e) {
+        await message(
+          `Could not send to FLdigi:\n${e}\n\nSaving the .309 file instead.`,
+          { title: "FLdigi", kind: "error" }
+        );
+        await saveFldigiFile(filename, content);
+      }
     } catch (err) {
       console.error("FLdigi export failed:", err);
     }
