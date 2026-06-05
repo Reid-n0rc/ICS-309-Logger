@@ -27,3 +27,45 @@ jobs:
           name: ics-309-logger-android-apk
           path: ${{ steps.build.outputs.apk-path }}
           if-no-files-found: error
+
+  # Boot an Android 13 (API 33) emulator — matching a moto g stylus 5G (2022) — and
+  # smoke-test the built APK: install, launch, and assert the app runs without
+  # crashing. The automated equivalent of sideloading and opening it on a phone.
+  emulator-smoke:
+    needs: android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download built APK
+        uses: actions/download-artifact@v7
+        with:
+          name: ics-309-logger-android-apk
+          path: apk
+
+      - name: Enable KVM (hardware acceleration)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run app on Android 13 emulator
+        uses: ReactiveCircus/android-emulator-runner@v2.37.0
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          ram-size: 4096M
+          disable-animations: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash scripts/android-smoke.sh
+
+      - name: Upload emulator screenshot
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-emulator-screenshot
+          path: emulator-screenshot.png
+          if-no-files-found: warn
