@@ -99,13 +99,8 @@ await page.keyboard.press("Enter"); // creates the event -> log view
 await sleep(500);
 await frame(12); // hold on the empty log view
 
-// 4. Log a few transmissions (keyboard-driven; Msg# auto-fills)
-const entriesToLog = [
-  ["KD7ABC", "W7XYZ", "Unit 4 on scene at Division A. Loud and clear."],
-  ["W7XYZ", "KE7QRS", "Relaying to Logistics, stand by."],
-  ["KE7QRS", "W7XYZ", "Two engines en route to staging."],
-];
-for (const [from, to, msg] of entriesToLog) {
+// 4. Log transmissions (keyboard-driven; Msg# auto-fills)
+const logEntry = async (from, to, msg) => {
   await typeAnim(from);
   await page.keyboard.press("Enter"); await sleep(140); await frame(3); // -> To (Msg# auto-fills)
   await typeAnim(to);
@@ -113,8 +108,22 @@ for (const [from, to, msg] of entriesToLog) {
   await typeAnim(msg, 2);
   await frame(4);
   await page.keyboard.press("Enter"); await sleep(180); await frame(8); // submit -> row appears
-}
+};
 
-await frame(20); // final hold ~1.7s
+await logEntry("KD7ABC", "W7XYZ", "Unit 4 on scene at Division A. Loud and clear.");
+await logEntry("W7XYZ", "KE7QRS", "Relaying to Logistics, stand by.");
+
+// 5. Show off the new feature: flip to dark mode via the header toggle.
+await frame(6);
+await page.evaluate(() => {
+  document.querySelector('button[aria-label="Switch to dark mode"]')?.click();
+});
+await sleep(150);
+await frame(18); // hold on the freshly-darkened UI
+
+// 6. Keep logging — now in dark mode.
+await logEntry("KE7QRS", "W7XYZ", "Two engines en route to staging.");
+
+await frame(22); // final hold (dark)
 await browser.close();
 console.log(`captured ${n} frames -> ${OUT}`);
