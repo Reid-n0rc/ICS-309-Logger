@@ -6,10 +6,22 @@ name: Nightly Build
 on:
   push:
     branches: [main]
+    # Docs/site/config-only commits don't change the built binaries, so skip the
+    # full multi-platform build for them (also avoids needless release churn).
+    paths-ignore:
+      - "**/*.md"
+      - "site/**"
+      - "docs/**"
+      - ".claudestate.md"
+      - ".gitignore"
 
+# Serialize nightly runs. Each run deletes and recreates the shared `nightly`
+# release, so overlapping runs could otherwise delete a release while another run
+# is still uploading to it (a race that failed the Windows upload). Queue instead
+# of cancelling so an in-flight run always finishes publishing before the next.
 concurrency:
   group: nightly
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: write
