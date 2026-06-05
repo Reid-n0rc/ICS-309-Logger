@@ -5,10 +5,12 @@ import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
 import ThemeToggle from "./ThemeToggle";
+import FileMenu from "./FileMenu";
 import { ask, message } from "@tauri-apps/plugin-dialog";
 import { exportIcs309Pdf } from "../lib/exportPdf";
 import { exportIcs309Excel } from "../lib/exportExcel";
 import { saveBytesWithDialog } from "../lib/saveFile";
+import { getFldigiSettings } from "../lib/settings";
 
 interface Props {
   event: Event;
@@ -157,29 +159,27 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       const content = await invoke<string>("generate_fldigi_export", { eventId: ev.id });
       const filename = fldigiFilename(ev);
 
-      // Offer to auto-send over FLdigi's socket (like flmsg), else save the .309 file.
+      // Offer to transmit over FLdigi (uses the host/port from File → Settings).
+      // The .309 file is saved either way.
+      const { host, port } = getFldigiSettings();
       const send = await ask(
-        "Send this ICS-309 to FLdigi for transmission now?\n\n" +
-          "Yes — transmit via FLdigi's XML-RPC socket (127.0.0.1:7362).\n" +
-          "No — save the .309 file instead.",
+        `Transmit this ICS-309 over FLdigi now?\n\n` +
+          `Yes — send via FLdigi's XML-RPC socket (${host}:${port}).\n` +
+          `No — just save the file.\n\nThe .309 file will be saved either way.`,
         { title: "Export FLdigi", kind: "info" }
       );
 
-      if (!send) {
-        await saveFldigiFile(filename, content);
-        return;
+      if (send) {
+        try {
+          await invoke("fldigi_send", { content, filename, host, port });
+          await message("Loaded into FLdigi and transmitting.", { title: "FLdigi", kind: "info" });
+        } catch (e) {
+          await message(`Could not send to FLdigi:\n${e}`, { title: "FLdigi", kind: "error" });
+        }
       }
 
-      try {
-        await invoke("fldigi_send", { content, filename });
-        await message("Loaded into FLdigi and transmitting.", { title: "FLdigi", kind: "info" });
-      } catch (e) {
-        await message(
-          `Could not send to FLdigi:\n${e}\n\nSaving the .309 file instead.`,
-          { title: "FLdigi", kind: "error" }
-        );
-        await saveFldigiFile(filename, content);
-      }
+      // Always save the .309 file.
+      await saveFldigiFile(filename, content);
     } catch (err) {
       console.error("FLdigi export failed:", err);
     }
@@ -205,6 +205,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
 
         {/* Menu */}
         <div className="flex flex-wrap items-center gap-1">
+          <FileMenu buttonClassName="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors" />
           <ThemeToggle className="w-7 h-7 bg-gray-700 hover:bg-gray-600 text-white" />
           <div className="w-px h-5 bg-gray-600 mx-1" />
           <button
