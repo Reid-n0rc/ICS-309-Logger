@@ -151,14 +151,14 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 p-4">
-      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
         New Log Entry
       </div>
       <div className="flex flex-wrap gap-2 items-start">
         {/* Time */}
         <div className="flex-shrink-0" style={{ width: 72 }}>
-          <label className="block text-xs text-gray-500 mb-1">Time (24h)</label>
+          <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Time (24h)</label>
           <input
             ref={timeRef}
             type="text"
@@ -174,14 +174,14 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
             inputMode="numeric"
             placeholder="HHMM"
             maxLength={4}
-            className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:border-blue-500 focus:outline-none"
+            className="entry-field w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono focus:border-blue-500 focus:outline-none"
           />
         </div>
 
         {/* FROM */}
         <div className="flex gap-1 flex-shrink-0">
           <div style={{ width: 120 }}>
-            <label className="block text-xs text-gray-500 mb-1">From Callsign/ID</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">From Callsign/ID</label>
             <input
               ref={fromCsRef}
               autoFocus
@@ -196,11 +196,11 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
               onKeyDown={handleFromCsKeyDown}
               onBlur={populateFromNum}
               enterKeyHint="next"
-              className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono uppercase focus:border-blue-500 focus:outline-none"
+              className="entry-field w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono uppercase focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div style={{ width: 64 }}>
-            <label className="block text-xs text-gray-500 mb-1">Msg #</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Msg #</label>
             <input
               ref={fromNumRef}
               type="text"
@@ -209,7 +209,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
               onKeyDown={handleFromNumKeyDown}
               tabIndex={-1}
               inputMode="numeric"
-              className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono text-center focus:border-blue-500 focus:outline-none"
+              className="entry-field w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono text-center focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
         {/* TO */}
         <div className="flex gap-1 flex-shrink-0">
           <div style={{ width: 120 }}>
-            <label className="block text-xs text-gray-500 mb-1">To Callsign/ID</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">To Callsign/ID</label>
             <input
               ref={toCsRef}
               type="text"
@@ -230,11 +230,11 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
               onKeyDown={handleToCsKeyDown}
               onBlur={populateToNum}
               enterKeyHint="next"
-              className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono uppercase focus:border-blue-500 focus:outline-none"
+              className="entry-field w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono uppercase focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div style={{ width: 64 }}>
-            <label className="block text-xs text-gray-500 mb-1">Msg #</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Msg #</label>
             <input
               ref={toNumRef}
               type="text"
@@ -243,15 +243,15 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
               onKeyDown={handleToNumKeyDown}
               tabIndex={-1}
               inputMode="numeric"
-              className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono text-center focus:border-blue-500 focus:outline-none"
+              className="entry-field w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono text-center focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>
 
         {/* Message */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs text-gray-500 mb-1">
-            Message <span className="font-normal text-gray-400">(Enter to submit · Shift+Enter for new line)</span>
+          <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+            Message <span className="font-normal text-gray-400 dark:text-gray-500">(Enter to submit · Shift+Enter for new line)</span>
           </label>
           <textarea
             ref={messageRef}
@@ -261,7 +261,7 @@ export default function EntryForm({ eventId, onEntryAdded }: Props) {
             enterKeyHint="send"
             rows={2}
             spellCheck
-            className="entry-field w-full px-2 py-1.5 border border-gray-300 rounded text-sm resize-none focus:border-blue-500 focus:outline-none"
+            className="entry-field w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm resize-none focus:border-blue-500 focus:outline-none"
           />
         </div>
 

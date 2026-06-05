@@ -56,10 +56,10 @@ export default function EditEntryModal({ entry, onSaved, onDeleted, onClose }: P
       className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
       onKeyDown={handleKeyDown}
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-800">Edit Log Entry</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Edit Log Entry</h2>
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none">
             ×
           </button>
         </div>
@@ -67,13 +67,13 @@ export default function EditEntryModal({ entry, onSaved, onDeleted, onClose }: P
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Time (24h)</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Time (24h)</label>
               <input
                 type="text"
                 value={timeVal}
                 onChange={(e) => setTimeVal(e.target.value)}
                 maxLength={4}
-                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:border-blue-500"
+                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -81,66 +81,66 @@ export default function EditEntryModal({ entry, onSaved, onDeleted, onClose }: P
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-xs font-medium text-gray-600 mb-1">From Callsign/ID</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">From Callsign/ID</label>
                 <input
                   autoFocus
                   type="text"
                   value={fromCs}
                   onChange={(e) => setFromCs(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono uppercase focus:outline-none focus:border-blue-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono uppercase focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div style={{ width: 72 }}>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Msg #</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Msg #</label>
                 <input
                   type="text"
                   value={fromNum}
                   onChange={(e) => setFromNum(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono text-center focus:outline-none focus:border-blue-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono text-center focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
 
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-xs font-medium text-gray-600 mb-1">To Callsign/ID</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">To Callsign/ID</label>
                 <input
                   type="text"
                   value={toCs}
                   onChange={(e) => setToCs(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono uppercase focus:outline-none focus:border-blue-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono uppercase focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div style={{ width: 72 }}>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Msg #</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Msg #</label>
                 <input
                   type="text"
                   value={toNum}
                   onChange={(e) => setToNum(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono text-center focus:outline-none focus:border-blue-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono text-center focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Message</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Message</label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
               spellCheck
-              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
+              className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm focus:outline-none focus:border-blue-500"
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div>
             {!confirmDelete ? (
               <button
                 onClick={() => setConfirmDelete(true)}
-                className="px-4 py-2 text-red-600 border border-red-300 rounded text-sm hover:bg-red-50 transition-colors"
+                className="px-4 py-2 text-red-600 border border-red-300 dark:border-red-700 rounded text-sm hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
               >
                 Delete Entry
               </button>
@@ -155,7 +155,7 @@ export default function EditEntryModal({ entry, onSaved, onDeleted, onClose }: P
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
+                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -165,7 +165,7 @@ export default function EditEntryModal({ entry, onSaved, onDeleted, onClose }: P
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Cancel
             </button>
