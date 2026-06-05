@@ -447,12 +447,6 @@ pub fn write_file(path: String, contents: Vec<u8>) -> CmdResult<()> {
     std::fs::write(&path, &contents).map_err(e)
 }
 
-/// Read raw bytes from an absolute path chosen by the user via an open dialog.
-#[tauri::command]
-pub fn read_file(path: String) -> CmdResult<Vec<u8>> {
-    std::fs::read(&path).map_err(e)
-}
-
 /// Save `contents` to a user-chosen location via a native save dialog.
 ///
 /// Android only: the dialog plugin's `save()` returns a Storage Access Framework
