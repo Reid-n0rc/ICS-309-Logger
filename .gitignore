@@ -13,3 +13,6 @@ src-tauri/gen/apple
 site/screenshots
 # Claude Agent State Tracking
 .claudestate.md
+
+# flmsg ICS-309 exports / samples
+*.309

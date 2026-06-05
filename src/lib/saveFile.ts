@@ -13,6 +13,7 @@ const MIME_BY_EXT: Record<string, string> = {
   pdf: "application/pdf",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   flmsg: "text/plain",
+  "309": "text/plain",
   txt: "text/plain",
 };
 

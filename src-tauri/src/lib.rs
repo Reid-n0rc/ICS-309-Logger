@@ -34,6 +34,7 @@ pub fn run() {
             commands::delete_log_entry,
             commands::get_next_msg_num,
             commands::generate_fldigi_export,
+            commands::fldigi_send,
             commands::get_db_path_str,
             commands::write_file,
             commands::save_file_dialog,
