@@ -57,6 +57,6 @@ For multi-step tasks, state a brief plan:
 2. [Step] → verify: [check]
 3. [Step] → verify: [check]
 ```
-##Signing##
+## Signing ##
 All commits and tags should be signed
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
