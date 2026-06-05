@@ -4,6 +4,7 @@ import { Event, LogEntry, UpdateEventInput } from "../types";
 import EntryForm from "./EntryForm";
 import LogTable from "./LogTable";
 import EditEntryModal from "./EditEntryModal";
+import ThemeToggle from "./ThemeToggle";
 import { exportIcs309Pdf } from "../lib/exportPdf";
 import { exportIcs309Excel } from "../lib/exportExcel";
 import { saveBytesWithDialog } from "../lib/saveFile";
@@ -144,7 +145,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
 
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header bar */}
       <div className="bg-gray-800 text-white px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
         <div className="flex items-center gap-4 min-w-0">
@@ -162,6 +163,8 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
 
         {/* Menu */}
         <div className="flex flex-wrap items-center gap-1">
+          <ThemeToggle className="w-7 h-7 bg-gray-700 hover:bg-gray-600 text-white" />
+          <div className="w-px h-5 bg-gray-600 mx-1" />
           <button
             onClick={handleExportPdf}
             className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
@@ -212,13 +215,13 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
               <span className="text-xs text-red-300">Confirm?</span>
               <button
                 onClick={handleCloseIncident}
-                className="px-2 py-1 text-xs bg-red-600 hover:bg-red-500 rounded"
+                className="px-2 py-1 text-xs bg-red-600 hover:bg-red-50 dark:hover:bg-red-900/300 rounded"
               >
                 Yes
               </button>
               <button
                 onClick={() => setConfirmClose(false)}
-                className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-500 rounded"
+                className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-7000 rounded"
               >
                 No
               </button>
@@ -241,7 +244,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
             {event.to_date || "—"} {event.to_time || ""}
           </span>
         </span>
-        <span className="ml-auto text-gray-500">
+        <span className="ml-auto text-gray-500 dark:text-gray-400">
           {entries.length} {entries.length === 1 ? "entry" : "entries"}
         </span>
       </div>
@@ -249,7 +252,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       {/* Entry form (fixed top) */}
       {!event.closed && <EntryForm eventId={event.id} onEntryAdded={handleEntryAdded} />}
       {event.closed && (
-        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800 flex-shrink-0">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800 px-4 py-2 text-sm text-yellow-800 dark:text-yellow-300 flex-shrink-0">
           This incident is closed. Log entries are read-only — use <strong>Reopen Incident</strong> to resume logging.
         </div>
       )}
@@ -257,7 +260,7 @@ export default function LogView({ event, onEventUpdate, onClose }: Props) {
       {/* Log table — fills the remaining window height and scrolls */}
       <div
         ref={tableContainerRef}
-        className="log-table-container flex-1 min-h-0 bg-white border-t border-gray-200"
+        className="log-table-container flex-1 min-h-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
       >
         <LogTable
           entries={entries}
@@ -330,10 +333,10 @@ function EventEditModal({ event, onSaved, onClose }: EventEditProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-800">Edit Event Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Edit Event Details</h2>
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none">×</button>
         </div>
 
         <div className="p-6 space-y-4">
@@ -341,36 +344,36 @@ function EventEditModal({ event, onSaved, onClose }: EventEditProps) {
           <Field label="Radio Network Name" value={radioNetwork} onChange={setRadioNetwork} />
           <Field label="Radio Operator" value={radioOperator} onChange={setRadioOperator} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-700">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">From Date</label>
               <input type="text" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
                 placeholder="YYYY-MM-DD"
-                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
+                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">From Time</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">From Time</label>
               <input type="text" value={fromTime} onChange={(e) => setFromTime(e.target.value)}
                 placeholder="HHMM" maxLength={4}
-                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
+                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">To Date</label>
               <input type="text" value={toDate} onChange={(e) => setToDate(e.target.value)}
                 placeholder="YYYY-MM-DD"
-                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
+                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">To Time</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">To Time</label>
               <input type="text" value={toTime} onChange={(e) => setToTime(e.target.value)}
                 placeholder="HHMM" maxLength={4}
-                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
+                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm font-mono focus:outline-none focus:border-blue-500" />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-          <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50">Cancel</button>
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <button onClick={onClose} className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
             {saving ? "Saving..." : "Save"}
@@ -384,9 +387,9 @@ function EventEditModal({ event, onSaved, onClose }: EventEditProps) {
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{label}</label>
       <input type="text" value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500" />
+        className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded text-sm focus:outline-none focus:border-blue-500" />
     </div>
   );
 }

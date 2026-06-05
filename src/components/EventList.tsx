@@ -19,17 +19,17 @@ export default function EventList({ onSelect, onBack }: Props) {
   }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Open Existing Event</h2>
-        <button onClick={onBack} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Open Existing Event</h2>
+        <button onClick={onBack} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none">
           ×
         </button>
       </div>
 
-      {loading && <p className="text-gray-500">Loading...</p>}
+      {loading && <p className="text-gray-500 dark:text-gray-400">Loading...</p>}
       {!loading && events.length === 0 && (
-        <p className="text-gray-500 text-center py-8">No events found.</p>
+        <p className="text-gray-500 dark:text-gray-400 text-center py-8">No events found.</p>
       )}
 
       <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -37,16 +37,16 @@ export default function EventList({ onSelect, onBack }: Props) {
           <button
             key={ev.id}
             onClick={() => onSelect(ev)}
-            className="w-full text-left px-4 py-3 bg-gray-50 border border-gray-200 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
+            className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-300 dark:hover:border-gray-500 transition-colors"
           >
             <div className="flex justify-between items-start">
               <div>
-                <div className="font-medium text-gray-800">{ev.incident_name}</div>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="font-medium text-gray-800 dark:text-gray-100">{ev.incident_name}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {ev.radio_network_name} · {ev.radio_operator}
                 </div>
               </div>
-              <div className="text-xs text-gray-400 text-right ml-4 flex-shrink-0">
+              <div className="text-xs text-gray-400 dark:text-gray-500 text-right ml-4 flex-shrink-0">
                 <div>{ev.from_date} {ev.from_time}</div>
                 {ev.closed && (
                   <div className="text-red-500 font-medium">Closed</div>
@@ -59,7 +59,7 @@ export default function EventList({ onSelect, onBack }: Props) {
 
       <button
         onClick={onBack}
-        className="mt-6 px-6 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+        className="mt-6 px-6 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         Back
       </button>

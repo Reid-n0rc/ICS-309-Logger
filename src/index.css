@@ -13,6 +13,16 @@ body {
   color: #111827;
 }
 
+html.dark body {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+/* Dark-mode color scheme so native form controls / scrollbars match. */
+html.dark {
+  color-scheme: dark;
+}
+
 #root {
   min-height: 100vh;
   display: flex;

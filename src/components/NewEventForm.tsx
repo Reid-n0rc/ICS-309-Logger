@@ -54,17 +54,17 @@ export default function NewEventForm({ onCreated, onCancel }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Create New Event</h2>
-        <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Create New Event</h2>
+        <button onClick={onCancel} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none">
           ×
         </button>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Incident Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -73,13 +73,13 @@ export default function NewEventForm({ onCreated, onCancel }: Props) {
             value={incidentName}
             onChange={(e) => setIncidentName(e.target.value)}
             onKeyDown={(e) => handleKeyDown(e, networkRef)}
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded focus:outline-none focus:border-blue-500"
             placeholder="e.g. Operation Blackwater"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Radio Network Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -88,13 +88,13 @@ export default function NewEventForm({ onCreated, onCancel }: Props) {
             value={radioNetwork}
             onChange={(e) => setRadioNetwork(e.target.value)}
             onKeyDown={(e) => handleKeyDown(e, operatorRef)}
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded focus:outline-none focus:border-blue-500"
             placeholder="e.g. Command Net"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Radio Operator (Name, Call Sign) <span className="text-red-500">*</span>
           </label>
           <input
@@ -103,7 +103,7 @@ export default function NewEventForm({ onCreated, onCancel }: Props) {
             value={radioOperator}
             onChange={(e) => setRadioOperator(e.target.value)}
             onKeyDown={(e) => handleKeyDown(e, null, true)}
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded focus:outline-none focus:border-blue-500"
             placeholder="e.g. John Smith, W1ABC"
           />
         </div>
@@ -121,13 +121,13 @@ export default function NewEventForm({ onCreated, onCancel }: Props) {
         </button>
         <button
           onClick={onCancel}
-          className="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+          className="px-6 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
           Cancel
         </button>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 text-center">
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">
         Press Enter to advance between fields · Enter on last field creates the event
       </p>
     </div>
