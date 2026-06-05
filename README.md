@@ -2,7 +2,7 @@
 
 A portable desktop app for capturing radio traffic and producing **ICS-309 Communications Logs**.
 
-![ICS-309 Logger in action — create an event and log radio traffic from the keyboard](docs/screenshots/demo.gif)
+![ICS-309 Logger in action — create an event, log radio traffic from the keyboard, and switch to dark mode](docs/screenshots/demo.gif)
 
 ## Download
 
